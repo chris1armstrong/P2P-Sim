@@ -1,19 +1,18 @@
 
-public class UDPReceiver implements Runnable {
+public class UDPPingReceiver implements Runnable {
 	private Peer peer;
 		
-	UDPReceiver (Peer peer) {
+	UDPPingReceiver (Peer peer) {
 		this.peer = peer;
 	}
 	
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
 		// listen for connection on port num 50000 + peerNum
 		// extract predecessor from ping
 		// save latest two predecessor numbers
 		// setup new datagram and return address socket
-		// Send ping
+		// Send ping ACK
 
 	}
 	

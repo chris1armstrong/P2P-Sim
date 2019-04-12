@@ -7,7 +7,7 @@ import java.util.*;
 public class cdht {
 	
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+
 		/*int i = 0;
 		for (String s : args) {
 			System.out.println(i + ": " + s);

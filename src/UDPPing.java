@@ -8,12 +8,12 @@ public class UDPPing implements Runnable {
 	
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
+
 		// Set up datagram
 		// get peerNum and set up send data
 		// set timeout value on socket
 		// try 	
-		//		Send ping
+		//		Send ping (alternate which peer to send ping to)
 		// 		wait for response
 		// catch timeout
 		//		increment unanswered
