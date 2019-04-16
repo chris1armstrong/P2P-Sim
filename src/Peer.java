@@ -1,6 +1,7 @@
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 
 public class Peer {
 	private Integer id;
@@ -18,6 +19,12 @@ public class Peer {
 		this.successor2 = Integer.parseInt(args[2]);
 		this.MSS = Integer.parseInt(args[3]);
 		this.dropRate = Float.parseFloat(args[4]);
+		try {
+			this.udpSocket = new DatagramSocket(50000 + this.id);
+		} catch (SocketException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 
