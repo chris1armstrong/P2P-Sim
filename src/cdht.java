@@ -15,7 +15,13 @@ public class cdht {
 		}*/
 		Peer peer = new Peer(args);
 		Thread tcpreceiver = new Thread(new TCPReceiver(peer));
+		Thread udppingrec = new Thread(new UDPPingReceiver(peer));
+		Thread udpping = new Thread(new UDPPing(peer));
+		
 		tcpreceiver.start();
+		udppingrec.start();
+		udpping.start();
+		
 		
 		Boolean breaker = true;
 		Scanner scan = new Scanner(System.in);

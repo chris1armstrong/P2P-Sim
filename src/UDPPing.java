@@ -14,39 +14,40 @@ public class UDPPing implements Runnable {
 	
 	@Override
 	public void run() {
+		System.out.println("UDPPing started");
 		Integer destPort = peer.getSuccessor1();
 		DatagramSocket succ = null;
+		InetAddress addr = null;
+		byte[] buf = (peer.getId().toString() + " request").getBytes();
+		Integer length = buf.length;
 		
 		try {
-			succ = new DatagramSocket(50000 + peer.getSuccessor1());
-		} catch (SocketException e1) {
+			addr = InetAddress.getByName("localhost");
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			while (true) {
+				System.out.println("Ping " + (50000 + destPort));
+				succ = new DatagramSocket();
+				DatagramPacket pingPacket = new DatagramPacket(buf, length, addr, 50000 + destPort);
+				try {
+					succ.send(pingPacket);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				Thread.sleep(5000);
+				if (destPort == peer.getSuccessor1()) {
+					destPort = peer.getSuccessor2();	
+				} else {
+					destPort = peer.getSuccessor1();
+				}
+				succ.close();
+			}
+		} catch (SocketException | InterruptedException e1) {
 			e1.printStackTrace();
 		}
-		while (true) {
-			byte[] buf = ("from " + peer.getId().toString()).getBytes();
-			Integer length = buf.length;
-			InetAddress addr = null;
-			try {
-				addr = InetAddress.getByName("localhost");
-			} catch (UnknownHostException e) {
-				e.printStackTrace();
-			}
-			DatagramPacket pingPacket = new DatagramPacket(buf, length, addr, destPort);
-			try {
-				succ.send(pingPacket);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			
-			if (destPort == peer.getSuccessor1()) {
-				destPort = peer.getSuccessor2();	
-			} else {
-				destPort = peer.getSuccessor1();
-			}
-		}
-		succ.close();
 		
 		// get next peer number
 		// load datagram with ping message and address

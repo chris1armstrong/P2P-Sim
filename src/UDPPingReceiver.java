@@ -26,15 +26,17 @@ public class UDPPingReceiver implements Runnable {
 	 */
 	@Override
 	public void run() {
+		System.out.println("UDPPingReceiver started");
 		byte[] receiveBuf = new byte[1024];
 		DatagramPacket pingReceive = new DatagramPacket(receiveBuf, 1024);
 		DatagramSocket receiveSocket = peer.getUdpSocket();
 		while (true) {
+			System.out.println("Receiver waiting");
 			try {
 				receiveSocket.receive(pingReceive);
 				//process received packet
+				System.out.println(new String(pingReceive.getData()).trim());
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
