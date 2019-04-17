@@ -10,6 +10,11 @@ public class Peer {
 	private Integer MSS;
 	private Float dropRate;
 	private DatagramSocket udpSocket;
+	private Integer predecessor1;
+	private Integer predecessor2;
+	private Long tscSuc1; //Time Since Contact
+	private Long tscSuc2; //Time Since Contact
+	
 	private Socket tcpClientSocket;
 	private ServerSocket tcpServerSocket;
 	
@@ -25,6 +30,10 @@ public class Peer {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		this.predecessor1 = -1;
+		this.predecessor2 = -1;
+		this.setTscSuc1(System.currentTimeMillis());
+		this.setTscSuc2(System.currentTimeMillis());
 	}
 	
 
@@ -32,14 +41,22 @@ public class Peer {
 		return id;
 	}
 
-	public Integer getSuccessor1() {
+	public synchronized Integer getSuccessor1() {
 		return successor1;
 	}
 
-	public Integer getSuccessor2() {
+	public synchronized Integer getSuccessor2() {
 		return successor2;
 	}
 
+	public synchronized void setSuccessor1(Integer i) {
+		this.successor1 = i;
+	}
+
+	public synchronized void setSuccessor2(Integer i) {
+		this.successor2 = i;
+	}
+	
 	public Integer getMSS() {
 		return MSS;
 	}
@@ -58,6 +75,46 @@ public class Peer {
 
 	public ServerSocket getTcpServerSocket() {
 		return tcpServerSocket;
+	}
+
+
+	public synchronized Integer getPredecessor2() {
+		return predecessor2;
+	}
+
+
+	public synchronized void setPredecessor2(Integer predecessor2) {
+		this.predecessor2 = predecessor2;
+	}
+
+
+	public synchronized Integer getPredecessor1() {
+		return predecessor1;
+	}
+
+
+	public synchronized void setPredecessor1(Integer predecessor1) {
+		this.predecessor1 = predecessor1;
+	}
+
+
+	public synchronized Long getTscSuc1() {
+		return tscSuc1;
+	}
+
+
+	public synchronized void setTscSuc1(long l) {
+		this.tscSuc1 = l;
+	}
+
+
+	public synchronized Long getTscSuc2() {
+		return tscSuc2;
+	}
+
+
+	public synchronized void setTscSuc2(long l) {
+		this.tscSuc2 = l;
 	}
 
 }
