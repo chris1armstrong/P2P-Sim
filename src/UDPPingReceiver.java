@@ -39,10 +39,10 @@ public class UDPPingReceiver implements Runnable {
 			System.out.println("Receiver waiting");
 			try {
 				receiveSocket.receive(pingReceive);
-				System.out.print("Packet received from " + pingReceive.getPort() + ": ");
-				String[] message = new String(pingReceive.getData()).trim().split("\\s+");
-				System.out.println(message);
+				String[] message = new String(pingReceive.getData(),0,pingReceive.getLength()).trim().split("\\s+");
 				Integer from = Integer.parseInt(message[0]);
+				System.out.print("Packet received from peer " + from + " on port " + pingReceive.getPort() + ": "); 
+				System.out.println(message[1]);
 				
 				switch (message[1]) {
 					case "request":
@@ -54,19 +54,25 @@ public class UDPPingReceiver implements Runnable {
 						pingResponseSocket.send(pingResponsePack);
 						
 						if (preFlag) {
+							System.out.print("preFlag set");
 							if (from == peer.getPredecessor1()) {
+								System.out.println(": RESET predecessor 2 (" + peer.getPredecessor2() + ") with " + preTemp);
 								peer.setPredecessor2(preTemp);
 							} else if (from == peer.getPredecessor2()) {
+								System.out.println(": RESET predecessor 1 (" + peer.getPredecessor1() + ") with " + preTemp);
 								peer.setPredecessor1(preTemp);
 							}
 							preFlag = false;
 						}
 						
 						if (peer.getPredecessor1() == -1) {
+							System.out.println("predecessor 1 not set...setting " + from);
 							peer.setPredecessor1(from);
 						} else if (peer.getPredecessor2() == -1) {
+							System.out.println("predecessor 2 not set...setting " + from);
 							peer.setPredecessor2(from);
 						} else if (from != peer.getPredecessor1() && from != peer.getPredecessor2()) {
+							System.out.println("new predecessor detected...saving " + from);
 							preTemp = from;
 							preFlag = true;
 						}
@@ -78,10 +84,13 @@ public class UDPPingReceiver implements Runnable {
 					 * 	break;
 					 */
 					case "response":
+						System.out.print("Ping response from " + from + ". ");
 						if (from == peer.getSuccessor1()) {
 							peer.setTscSuc1(System.currentTimeMillis());
+							System.out.println("Resetting tscSuc1");
 						} else if (from == peer.getSuccessor2()) {
 							peer.setTscSuc2(System.currentTimeMillis());
+							System.out.println("Resetting tscSuc2");
 						}
 						break;
 					/*	
@@ -89,14 +98,17 @@ public class UDPPingReceiver implements Runnable {
 					 * 	break;
 					 */
 					case "leaving":
+						System.out.print("Peer " + from + " leaving. ");
 						if (from == peer.getSuccessor1()) {
 							peer.setSuccessor1(Integer.parseInt(message[2]));
 							peer.setSuccessor2(Integer.parseInt(message[3]));
 							peer.setTscSuc1(System.currentTimeMillis());
 							peer.setTscSuc2(System.currentTimeMillis());
+							System.out.println("Peer is successor 1. New succ1 = " + peer.getSuccessor1() + ". New succ2 = " + peer.getSuccessor2());
 						} else if (from == peer.getSuccessor2()) {
 							peer.setSuccessor2(Integer.parseInt(message[2]));
 							peer.setTscSuc2(System.currentTimeMillis());
+							System.out.println("Peer is successor 2. New succ2 = " + peer.getSuccessor2());
 						}
 						break;
 					/*	
@@ -105,6 +117,7 @@ public class UDPPingReceiver implements Runnable {
 					 * 	break;
 					 */
 					case "getSuccessors":
+						System.out.println("Peer " + from + " asking for my successors");
 						String successorsResponse = (peer.getId() + " mySuccessors " + peer.getSuccessor1() + " " + peer.getSuccessor2());
 						byte[] out = successorsResponse.getBytes();
 						InetAddress addr = InetAddress.getByName("localhost");
@@ -117,15 +130,18 @@ public class UDPPingReceiver implements Runnable {
 					 * 	break;
 					 */
 					case "mySuccessors":
+						System.out.println("Peer " + from + " telling me its successors");
 						Long timeout = 30000L; //30 seconds = 30000 milliseconds
 						if ((System.currentTimeMillis() - peer.getTscSuc1()) > timeout) {
 							peer.setSuccessor1(Integer.parseInt(message[2]));
 							peer.setSuccessor2(Integer.parseInt(message[3]));
 							peer.setTscSuc1(System.currentTimeMillis());
 							peer.setTscSuc2(System.currentTimeMillis());
+							System.out.println("Peer is successor 1. It has timed out. New succ1 = " + peer.getSuccessor1() + ". New succ2 = " + peer.getSuccessor2());
 						} else if ((System.currentTimeMillis() - peer.getTscSuc2()) > timeout) {
 							peer.setSuccessor2(Integer.parseInt(message[2]));
 							peer.setTscSuc2(System.currentTimeMillis());
+							System.out.println("Peer is successor 2. It has timed out. New succ2 = " + peer.getSuccessor2());
 						}
 						break;
 					/*	
