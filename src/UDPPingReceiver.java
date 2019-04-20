@@ -133,13 +133,13 @@ public class UDPPingReceiver implements Runnable {
 						System.out.println("Peer " + from + " telling me its successors");
 						Long timeout = 30000L; //30 seconds = 30000 milliseconds
 						if ((System.currentTimeMillis() - peer.getTscSuc1()) > timeout) {
-							peer.setSuccessor1(Integer.parseInt(message[2]));
-							peer.setSuccessor2(Integer.parseInt(message[3]));
+							peer.setSuccessor1(peer.getSuccessor2());
+							peer.setSuccessor2(Integer.parseInt(message[2]));
 							peer.setTscSuc1(System.currentTimeMillis());
 							peer.setTscSuc2(System.currentTimeMillis());
 							System.out.println("Peer is successor 1. It has timed out. New succ1 = " + peer.getSuccessor1() + ". New succ2 = " + peer.getSuccessor2());
 						} else if ((System.currentTimeMillis() - peer.getTscSuc2()) > timeout) {
-							peer.setSuccessor2(Integer.parseInt(message[2]));
+							peer.setSuccessor2(Integer.parseInt(message[3]));
 							peer.setTscSuc2(System.currentTimeMillis());
 							System.out.println("Peer is successor 2. It has timed out. New succ2 = " + peer.getSuccessor2());
 						}
