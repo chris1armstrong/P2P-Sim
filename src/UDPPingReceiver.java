@@ -139,7 +139,11 @@ public class UDPPingReceiver implements Runnable {
 							peer.setTscSuc2(System.currentTimeMillis());
 							System.out.println("Peer is successor 1. It has timed out. New succ1 = " + peer.getSuccessor1() + ". New succ2 = " + peer.getSuccessor2());
 						} else if ((System.currentTimeMillis() - peer.getTscSuc2()) > timeout) {
-							peer.setSuccessor2(Integer.parseInt(message[3]));
+							if (Integer.parseInt(message[2]) != peer.getSuccessor2()) { 
+								peer.setSuccessor2(Integer.parseInt(message[2])); //successor has already updated its neighbour list, take its 1st successor
+							} else {
+								peer.setSuccessor2(Integer.parseInt(message[3])); //successor has not updated its neighbour yet, take its 2nd successor
+							}
 							peer.setTscSuc2(System.currentTimeMillis());
 							System.out.println("Peer is successor 2. It has timed out. New succ2 = " + peer.getSuccessor2());
 						}
