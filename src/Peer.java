@@ -12,8 +12,8 @@ public class Peer {
 	private DatagramSocket udpSocket;
 	private Integer predecessor1;
 	private Integer predecessor2;
-	private Long tscSuc1; //Time Since Contact
-	private Long tscSuc2; //Time Since Contact
+	private Integer tscSuc1; //Time Since Contact
+	private Integer tscSuc2; //Time Since Contact
 	
 	private Socket tcpClientSocket;
 	private ServerSocket tcpServerSocket;
@@ -32,8 +32,8 @@ public class Peer {
 		}
 		this.predecessor1 = -1;
 		this.predecessor2 = -1;
-		this.setTscSuc1(System.currentTimeMillis());
-		this.setTscSuc2(System.currentTimeMillis());
+		this.setTscSuc1(0);
+		this.setTscSuc2(0);
 	}
 	
 
@@ -98,22 +98,22 @@ public class Peer {
 	}
 
 
-	public synchronized Long getTscSuc1() {
+	public synchronized Integer getTscSuc1() {
 		return tscSuc1;
 	}
 
 
-	public synchronized void setTscSuc1(long l) {
+	public synchronized void setTscSuc1(Integer l) {
 		this.tscSuc1 = l;
 	}
 
 
-	public synchronized Long getTscSuc2() {
+	public synchronized Integer getTscSuc2() {
 		return tscSuc2;
 	}
 
 
-	public synchronized void setTscSuc2(long l) {
+	public synchronized void setTscSuc2(Integer l) {
 		this.tscSuc2 = l;
 	}
 

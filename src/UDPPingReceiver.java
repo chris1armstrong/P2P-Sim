@@ -46,7 +46,7 @@ public class UDPPingReceiver implements Runnable {
 				
 				switch (message[1]) {
 					case "request":
-						String pingResponse = (peer.getId() + " response");
+						String pingResponse = (peer.getId() + " response " + message[2]);
 						byte[] outPingResponse = pingResponse.getBytes();
 						InetAddress requesterAddr = InetAddress.getByName("localhost");
 						DatagramSocket pingResponseSocket = new DatagramSocket();
@@ -86,18 +86,18 @@ public class UDPPingReceiver implements Runnable {
 					case "response":
 						System.out.print("Ping response from " + from + ". ");
 						if (from == peer.getSuccessor1()) {
-							peer.setTscSuc1(System.currentTimeMillis());
-							System.out.println("Resetting tscSuc1");
+							peer.setTscSuc1(Integer.parseInt(message[2]));
+							System.out.println("Setting tscSuc1 to " + message[2]);
 						} else if (from == peer.getSuccessor2()) {
-							peer.setTscSuc2(System.currentTimeMillis());
-							System.out.println("Resetting tscSuc2");
+							peer.setTscSuc2(Integer.parseInt(message[2]));
+							System.out.println("Setting tscSuc2 to " + message[2]);
 						}
 						break;
 					/*	
 					 *  reset tscSuccX for fromID = X
 					 * 	break;
 					 */
-					case "leaving":
+					/*case "leaving":
 						System.out.print("Peer " + from + " leaving. ");
 						if (from == peer.getSuccessor1()) {
 							peer.setSuccessor1(Integer.parseInt(message[2]));
@@ -111,11 +111,13 @@ public class UDPPingReceiver implements Runnable {
 							System.out.println("Peer is successor 2. New succ2 = " + peer.getSuccessor2());
 						}
 						break;
+					*/
 					/*	
 					 * 	if (fromID == peer.succ1) peer.succ1 = succ1, peer.succ2 = succ2, reset tscSuccX for both
 					 * 	else if (fromID == peer.succ2) peer.succ2 = succ1, reset tscSucc2
 					 * 	break;
 					 */
+						/*
 					case "getSuccessors":
 						System.out.println("Peer " + from + " asking for my successors");
 						String successorsResponse = (peer.getId() + " mySuccessors " + peer.getSuccessor1() + " " + peer.getSuccessor2());
@@ -125,10 +127,12 @@ public class UDPPingReceiver implements Runnable {
 						DatagramPacket pack = new DatagramPacket(out, out.length, addr, 50000 + from);
 						resp.send(pack);
 						break;
+						*/
 					/*	
 					 * 	send "peer.id mySuccessors peer.succ1 peer.succ2" to Port 50000 + fromID
 					 * 	break;
 					 */
+						/*
 					case "mySuccessors":
 						System.out.println("Peer " + from + " telling me its successors");
 						Long timeout = 30000L; //30 seconds = 30000 milliseconds
@@ -148,6 +152,7 @@ public class UDPPingReceiver implements Runnable {
 							System.out.println("Peer is successor 2. It has timed out. New succ2 = " + peer.getSuccessor2());
 						}
 						break;
+						*/
 					/*	
 					 * 	if (tscSucc1 > 30 sec) peer.succ1 = peer.succ2 = succ1, peer.succ2 = succ2, reset tscSuccX
 					 * 	else if (tscSucc2 > 30 sec) peer.succ2 = succ1, reset tscSucc2
@@ -164,26 +169,9 @@ public class UDPPingReceiver implements Runnable {
 		 * message types:
 		 * 1. "fromID request"
 		 * 2. "fromID response"
-		 * 3. "fromID leaving succ1 succ2"
-		 * 4. "fromID getSuccessors"
-		 * 5. "fromID mySuccessors peer.succ1 peer.succ2
+		 * -3. "fromID leaving succ1 succ2"
+		 * -4. "fromID getSuccessors"
+		 * -5. "fromID mySuccessors peer.succ1 peer.succ2
 		 */
 	}
-	
-	/*
-	private void SavePredecessor(Integer peer) {
-		if (order == null) {
-			predecessor1 = peer;
-			order = 1;
-		} else if (predecessor2 == null) {
-			predecessor2 = peer;
-		} else if (peer != predecessor1 || peer != predecessor2) {
-			if (order == 1) { //1 indicates predecessor1 is older
-				predecessor1 = peer;
-			} else {		//else order = 2, predecessor2 is older
-				predecessor2 = peer;
-			}
-		}
-		
-	}*/
 }
