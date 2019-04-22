@@ -32,6 +32,7 @@ public class cdht {
 			} else if (command[0].equals("request")) {
 				String fileNo = command[1];
 				System.out.println("File num = " + fileNo);
+				System.out.println("File num as Integer = " + Integer.parseInt(fileNo));
 				Socket request = null;
 				
 				try {
@@ -41,7 +42,8 @@ public class cdht {
 					
 					request = new Socket("localhost", 50000 + peer.getSuccessor1());
 					DataOutputStream outToClient = new DataOutputStream(request.getOutputStream());
-					String b = new String(peer.getId() + " request " + peer.getId() + " " + fileNo + " " + peer.getUdpFileRecSocket().getPort());
+					String b = new String(peer.getId() + " request " + peer.getId() + " " + fileNo + " " + peer.getUdpFileRecSocket().getLocalPort());
+					System.out.println("Sending message: " + b);
 					//message style: "fromID request origin fileNo UDPFileReceiverPort"
 					outToClient.writeBytes(b + '\n');
 					request.close();

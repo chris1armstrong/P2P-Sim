@@ -21,11 +21,9 @@ public class UDPPing implements Runnable {
 	public void run() {
 		System.out.println("UDPPing started");
 		Integer destPort = peer.getSuccessor1(); //Initial successor peer
-		//Integer prevPort = null;
 		DatagramSocket succ = null; //Ping sent on this socket
 		InetAddress addr = null; //Address of this machine
 		byte[] buf; //ping message in buffer
-		//byte[] timeoutBuf = (peer.getId().toString() + " getSuccessors").getBytes(); //ping message for timeouts in buffer
 		Integer seq = 0;
 		
 		//Get address of this machine
