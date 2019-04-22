@@ -10,13 +10,13 @@ public class Peer {
 	private Integer MSS;
 	private Float dropRate;
 	private DatagramSocket udpSocket;
+	private DatagramSocket udpFileRecSocket;
 	private Integer predecessor1;
 	private Integer predecessor2;
 	private Integer tscSuc1; //Time Since Contact
 	private Integer tscSuc2; //Time Since Contact
-	
-	private Socket tcpClientSocket;
-	private ServerSocket tcpServerSocket;
+	private Integer sequenceNum1;
+	private Integer sequenceNum2;
 	
 	public Peer(String[] args) {
 		this.id = Integer.parseInt(args[0]);
@@ -34,6 +34,14 @@ public class Peer {
 		this.predecessor2 = -1;
 		this.setTscSuc1(0);
 		this.setTscSuc2(0);
+		this.sequenceNum1 = 0;
+		this.sequenceNum2 = 0;
+		try {
+			this.setUdpFileRecSocket(new DatagramSocket());
+		} catch (SocketException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 
@@ -67,14 +75,6 @@ public class Peer {
 
 	public DatagramSocket getUdpSocket() {
 		return udpSocket;
-	}
-
-	public Socket getTcpClientSocket() {
-		return tcpClientSocket;
-	}
-
-	public ServerSocket getTcpServerSocket() {
-		return tcpServerSocket;
 	}
 
 
@@ -115,6 +115,46 @@ public class Peer {
 
 	public synchronized void setTscSuc2(Integer l) {
 		this.tscSuc2 = l;
+	}
+
+
+	public synchronized Integer getSequenceNum1() {
+		return sequenceNum1;
+	}
+
+
+	public synchronized void setSequenceNum1(Integer sequenceNum1) {
+		this.sequenceNum1 = sequenceNum1;
+	}
+	
+	
+	public synchronized void incrementSequenceNum1() {
+		this.sequenceNum1++;
+	}
+
+	
+	public synchronized Integer getSequenceNum2() {
+		return sequenceNum2;
+	}
+
+
+	public synchronized void setSequenceNum2(Integer sequenceNum2) {
+		this.sequenceNum2 = sequenceNum2;
+	}
+
+	
+	public synchronized void incrementSequenceNum2() {
+		this.sequenceNum2++;
+	}
+
+
+	public DatagramSocket getUdpFileRecSocket() {
+		return udpFileRecSocket;
+	}
+
+
+	public void setUdpFileRecSocket(DatagramSocket udpFileRecSocket) {
+		this.udpFileRecSocket = udpFileRecSocket;
 	}
 
 }

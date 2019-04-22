@@ -26,10 +26,7 @@ public class UDPPing implements Runnable {
 		InetAddress addr = null; //Address of this machine
 		byte[] buf; //ping message in buffer
 		//byte[] timeoutBuf = (peer.getId().toString() + " getSuccessors").getBytes(); //ping message for timeouts in buffer
-		Boolean timeoutFlag = false;
 		Integer seq = 0;
-		Integer seq1 = 0;
-		Integer seq2 = 0;
 		
 		//Get address of this machine
 		try {
@@ -58,45 +55,26 @@ public class UDPPing implements Runnable {
 				
 				//get the port number of the other peer, alternating between successors
 				if (destPort == peer.getSuccessor1()) {
-					if (seq2 - peer.getTscSuc2() > 3) { //successor 2 has timed out. send alternate request
-						timeoutFlag = true;
-						//prevPort = destPort;
-						//TCP request destPort for peers 
-						peerTimeout(destPort, seq2);
-						seq2 = 0;
+					if (peer.getSequenceNum2() - peer.getTscSuc2() > 3) { //successor 2 has timed out. send alternate request
+						peerTimeout(destPort, peer.getSequenceNum2());
+						peer.setSequenceNum2(0);
 					}
-					seq2++;
-					seq = seq2;
+					peer.incrementSequenceNum2();
+					seq = peer.getSequenceNum2();
 					destPort = peer.getSuccessor2();
-					System.out.println("current seq: " + seq2 + " - tscSuc2: " + peer.getTscSuc2() + " = " + (seq2 - peer.getTscSuc2()));
+					System.out.println("current seq: " + seq + " - tscSuc2: " + peer.getTscSuc2() + " = " + (seq - peer.getTscSuc2()));
 				} else if (destPort == peer.getSuccessor2()){
-					if (seq1 - peer.getTscSuc1() > 3) { //successor 1 has timed out. send alternate request
-						timeoutFlag = true;
-						//prevPort = destPort;
-						peerTimeout(destPort,seq1);
-						seq1 = 0;
-						seq2 = 0;
+					if (peer.getSequenceNum1() - peer.getTscSuc1() > 3) { //successor 1 has timed out. send alternate request
+						peerTimeout(destPort,peer.getSequenceNum1());
+						peer.setSequenceNum1(0);
+						peer.setSequenceNum2(0);
 					}
-					seq1++;
-					seq = seq1;
+					peer.incrementSequenceNum1();
+					seq = peer.getSequenceNum1();
 					destPort = peer.getSuccessor1();
-					System.out.println("current seq: " + seq1 + " - tscSuc1: " + peer.getTscSuc1() + " = " + (seq1 - peer.getTscSuc1()));
+					System.out.println("current seq: " + seq + " - tscSuc1: " + peer.getTscSuc1() + " = " + (seq - peer.getTscSuc1()));
 				}
 				
-				if (timeoutFlag) { //Change to TCP request to prevPort
-					System.out.println("timeout -> send TCP request");
-					/*
-					try {
-						pingPacket = new DatagramPacket(timeoutBuf, timeoutBuf.length, addr, 50000 + prevPort);
-						succ.send(pingPacket);
-					} catch (IOException e) {
-						e.printStackTrace();
-					} finally {
-						timeoutFlag = false;
-					}
-					*/
-					timeoutFlag = false;
-				}
 				//close the socket
 				succ.close();
 			}

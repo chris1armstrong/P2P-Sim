@@ -26,22 +26,72 @@ public class TCPReceiver implements Runnable {
 				DataOutputStream outToClient = new DataOutputStream(peerConnection.getOutputStream());
 				
 				String inputString = inFromClient.readLine();
-				String[] clientSentence = inputString.split("\\s+");
-				System.out.println("Received: " + inputString + " |=");
+				String[] message = inputString.split("\\s+");
+				System.out.println("Received: " + inputString);
+				Integer from = Integer.parseInt(message[0]);
 				
-				if (clientSentence[1].equals("getSuccessors")) {
-					System.out.println("Successors requested by peer " + clientSentence[0]);
+				switch (message[1]) {
+				case "getSuccessors":
+					System.out.println("Successors requested by peer " + message[0]);
 					String reply = new String(peer.getId() + " mySuccessors " + peer.getSuccessor1() + " " + peer.getSuccessor2());
 					outToClient.writeBytes(reply + '\n');
-				} else if (Integer.parseInt(clientSentence[0]) == peer.getId()) {
-					System.out.println("I got it");
-				} /*else {
-					Socket nextPeer = new Socket("localhost",50000 + peer.getSuccessor1());
-					DataOutputStream outage = new DataOutputStream(nextPeer.getOutputStream());
-					byte[] b = new String("Sending from " + (50000+peer.getId())).getBytes();
-					outage.write(b);
-					nextPeer.close();
-				}*/
+					break;
+				case "departing":
+					//leaving logic from UDP
+					System.out.print("Peer " + from + " leaving. ");
+					if (from == peer.getSuccessor1()) {
+						peer.setSuccessor1(Integer.parseInt(message[2]));
+						peer.setSuccessor2(Integer.parseInt(message[3]));
+						peer.setTscSuc1(0);
+						peer.setSequenceNum1(0);
+						peer.setTscSuc2(0);
+						peer.setSequenceNum2(0);
+						System.out.println("Peer is successor 1. New succ1 = " + peer.getSuccessor1() + ". New succ2 = " + peer.getSuccessor2());
+					} else if (from == peer.getSuccessor2()) {
+						peer.setSuccessor2(Integer.parseInt(message[2]));
+						peer.setTscSuc2(0);
+						peer.setSequenceNum2(0);
+						System.out.println("Peer is successor 2. New succ2 = " + peer.getSuccessor2());
+					}
+					break;
+				case "request":
+					//Integer origin = Integer.parseInt(message[2]);
+					Integer fileNum = Integer.parseInt(message[3]);
+					Integer locator = fileNum%255;
+					Boolean mine = false;
+					if (locator <= peer.getId() && locator > from) {
+						mine = true;
+						//I have it
+					} else if (locator > from && peer.getId() < from) {
+						mine = true;
+						//I have it
+					} else if (locator < from && locator <= peer.getId() && peer.getId() < from){
+						mine = true;
+						//I have it
+					} else {
+						//Establish TCP connection to port 50000 + peer.getSuccessor1()
+						//forward to immediate successor
+						//Close TCP connection
+						System.out.println("Asking my successor, peer " + peer.getSuccessor1());
+					}
+					if (mine) {
+						//Establish connection to origin TCP port, send confirmation
+						//Start UDPFileSender Thread, give it fileNo & UDPFileReceiverPort
+						System.out.println("I have the file " + fileNum);
+					}
+					break;
+				case "confirm":
+					//received confirmation message from peer holding requested fileNo
+					break;
+				}
+
+				/*
+				 * message types:
+				 * 1. "fromID getSuccessors"
+				 * 2. "fromID departing succ1 succ2"
+				 * 3. "fromID request origin fileNo UDPFileReceiverPort"
+				 * 4. "fromID confirm fileNo" ??
+				 */
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

@@ -17,8 +17,10 @@ public class cdht {
 		Thread tcpreceiver = new Thread(new TCPReceiver(peer));
 		Thread udppingrec = new Thread(new UDPPingReceiver(peer));
 		Thread udpping = new Thread(new UDPPing(peer));
+		//Thread udpfilereceiver = new Thread(new UDPFileReceiver(peer));
 		
 		tcpreceiver.start();
+		//udpfilereceiver.start();
 		udppingrec.start();
 		udpping.start();
 		
