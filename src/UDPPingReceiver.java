@@ -52,7 +52,7 @@ public class UDPPingReceiver implements Runnable {
 						DatagramSocket pingResponseSocket = new DatagramSocket();
 						DatagramPacket pingResponsePack = new DatagramPacket(outPingResponse, outPingResponse.length, requesterAddr, 50000 + from);
 						pingResponseSocket.send(pingResponsePack);
-						
+						pingResponseSocket.close();
 						if (preFlag) {
 							System.out.print("preFlag set");
 							if (from == peer.getPredecessor1()) {

@@ -1,6 +1,4 @@
 import java.net.DatagramSocket;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.net.SocketException;
 
 public class Peer {
@@ -36,12 +34,7 @@ public class Peer {
 		this.setTscSuc2(0);
 		this.sequenceNum1 = 0;
 		this.sequenceNum2 = 0;
-		try {
-			this.setUdpFileRecSocket(new DatagramSocket());
-		} catch (SocketException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		this.setUdpFileRecSocket(null);
 	}
 	
 

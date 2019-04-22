@@ -1,4 +1,5 @@
 import java.io.*;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -55,8 +56,9 @@ public class TCPReceiver implements Runnable {
 					}
 					break;
 				case "request":
-					//Integer origin = Integer.parseInt(message[2]);
+					Integer origin = Integer.parseInt(message[2]);
 					Integer fileNum = Integer.parseInt(message[3]);
+					Integer originFileReceiverPort = Integer.parseInt(message[4]);
 					Integer locator = fileNum%255;
 					Boolean mine = false;
 					if (locator <= peer.getId() && locator > from) {
@@ -70,18 +72,34 @@ public class TCPReceiver implements Runnable {
 						//I have it
 					} else {
 						//Establish TCP connection to port 50000 + peer.getSuccessor1()
+						InetAddress forwardAddr = InetAddress.getByName("localhost");
+						Socket forward = new Socket(forwardAddr, 50000 + peer.getSuccessor1());
+						DataOutputStream forwardOut = new DataOutputStream(forward.getOutputStream());
+						String forwardMessage = new String(peer.getId() + " request " + origin + " " + message[3] + " " + originFileReceiverPort);
 						//forward to immediate successor
+						forwardOut.writeBytes(forwardMessage + '\n');
+						forward.close();
 						//Close TCP connection
-						System.out.println("Asking my successor, peer " + peer.getSuccessor1());
+						System.out.println("Forwarding to successor, peer " + peer.getSuccessor1());
 					}
 					if (mine) {
 						//Establish connection to origin TCP port, send confirmation
+						InetAddress confirmAddr = InetAddress.getByName("localhost");
+						Socket confirm = new Socket(confirmAddr, 50000 + origin);
+						DataOutputStream forwardOut = new DataOutputStream(confirm.getOutputStream());
+						String forwardMessage = new String(peer.getId() + " confirm " + message[3]);
+						forwardOut.writeBytes(forwardMessage + '\n');
+						confirm.close();
 						//Start UDPFileSender Thread, give it fileNo & UDPFileReceiverPort
+						Integer receiverPort = Integer.parseInt(message[4]);
+						Thread sender = new Thread(new UDPFileSender(peer, message[3], receiverPort));
+						sender.start();
 						System.out.println("I have the file " + fileNum);
 					}
 					break;
 				case "confirm":
 					//received confirmation message from peer holding requested fileNo
+					System.out.println("File " + Integer.parseInt(message[2]) + " found in peer " + Integer.parseInt(message[0]));
 					break;
 				}
 

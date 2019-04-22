@@ -1,10 +1,11 @@
+import java.io.File;
 
 public class UDPFileSender implements Runnable {
-	private Integer fileNum;
+	private String fileNum;
 	private Integer receiverSocket;
 	private Peer peer;
 		
-	UDPFileSender (Peer peer, Integer fileNum, Integer receiverSocket) {
+	UDPFileSender (Peer peer, String fileNum, Integer receiverSocket) {
 		this.fileNum = fileNum;
 		this.receiverSocket = receiverSocket;
 		this.peer = peer;
@@ -12,6 +13,12 @@ public class UDPFileSender implements Runnable {
 	
 	@Override
 	public void run() {
+		String filename = fileNum + ".pdf";
+		File input = new File(filename);
+		System.out.println("Peer: " + peer.getId() + " file sender thread started");
+		System.out.println("SLURPING UP the file: " + filename + " === opened file: " + input);
+		System.out.println("Chunking and sending to: " + receiverSocket);
+		
 		// get File using fileNum
 		// process the file into chunks of size peer.getMSS()
 		// setup new datagram with address of receiverSocket & sequence number (1 or 0)

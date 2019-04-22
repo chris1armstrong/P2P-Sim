@@ -1,5 +1,6 @@
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.DatagramSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.*;
@@ -8,19 +9,14 @@ public class cdht {
 	
 	public static void main(String[] args) {
 
-		/*int i = 0;
-		for (String s : args) {
-			System.out.println(i + ": " + s);
-			i++;
-		}*/
 		Peer peer = new Peer(args);
 		Thread tcpreceiver = new Thread(new TCPReceiver(peer));
 		Thread udppingrec = new Thread(new UDPPingReceiver(peer));
 		Thread udpping = new Thread(new UDPPing(peer));
-		//Thread udpfilereceiver = new Thread(new UDPFileReceiver(peer));
+		
 		
 		tcpreceiver.start();
-		//udpfilereceiver.start();
+		
 		udppingrec.start();
 		udpping.start();
 		
@@ -33,22 +29,25 @@ public class cdht {
 			if (command[0].equals("quit")) {
 				System.out.println("I'm ded");
 				breaker = false;
-			} else if (command[0].equals("File")) {
-				Integer fileNo = Integer.parseInt(command[1]);
+			} else if (command[0].equals("request")) {
+				String fileNo = command[1];
 				System.out.println("File num = " + fileNo);
-				Integer fileLoc = fileNo%255;
 				Socket request = null;
+				
 				try {
-					request = new Socket("localhost", 50000 + fileLoc);
+					peer.setUdpFileRecSocket(new DatagramSocket());
+					Thread udpfilereceiver = new Thread(new UDPFileReceiver(peer));
+					udpfilereceiver.start();
+					
+					request = new Socket("localhost", 50000 + peer.getSuccessor1());
 					DataOutputStream outToClient = new DataOutputStream(request.getOutputStream());
-					byte[] b = new String(fileNo + " " + (50000+peer.getId())).getBytes();
-					outToClient.write(b);
+					String b = new String(peer.getId() + " request " + peer.getId() + " " + fileNo + " " + peer.getUdpFileRecSocket().getPort());
+					//message style: "fromID request origin fileNo UDPFileReceiverPort"
+					outToClient.writeBytes(b + '\n');
 					request.close();
 				} catch (UnknownHostException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
