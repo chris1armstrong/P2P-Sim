@@ -28,7 +28,35 @@ public class cdht {
 			String[] command = input.split("\\s+");
 			if (command[0].equals("quit")) {
 				System.out.println("I'm ded");
+				// 2. "fromID departing succ1 succ2"
+				try {
+					if (peer.getPredecessor1() != -1) {
+						Socket request = null;
+						request = new Socket("localhost", 50000 + peer.getPredecessor1());
+						DataOutputStream requestOut = new DataOutputStream(request.getOutputStream());
+						String b = new String(peer.getId() + " departing " + peer.getSuccessor1() + " " + peer.getSuccessor2());
+						System.out.println("Sending message: " + b);
+						requestOut.writeBytes(b + '\n');
+						request.close();
+						breaker = false;
+					} 
+					if (peer.getPredecessor2() != -1) {
+						Socket request = null;
+						request = new Socket("localhost", 50000 + peer.getPredecessor2());
+						DataOutputStream requestOut = new DataOutputStream(request.getOutputStream());
+						String b = new String(peer.getId() + " departing " + peer.getSuccessor1() + " " + peer.getSuccessor2());
+						System.out.println("Sending message: " + b);
+						requestOut.writeBytes(b + '\n');
+						request.close();
+						breaker = false;
+					}
+					
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				
 				breaker = false;
+				
 			} else if (command[0].equals("request")) {
 				String fileNo = command[1];
 				System.out.println("File num = " + fileNo);
@@ -47,6 +75,7 @@ public class cdht {
 					//message style: "fromID request origin fileNo UDPFileReceiverPort"
 					outToClient.writeBytes(b + '\n');
 					request.close();
+					
 				} catch (UnknownHostException e) {
 					e.printStackTrace();
 				} catch (IOException e) {
