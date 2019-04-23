@@ -1,15 +1,14 @@
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
-import java.nio.file.Files;
-import java.util.Arrays;
+import java.util.Random;
 
 public class UDPFileSender implements Runnable {
 	private String fileNum;
@@ -27,6 +26,7 @@ public class UDPFileSender implements Runnable {
 		String filename = fileNum + ".pdf";
 		File input = new File(filename);
 		RandomAccessFile inputFile = null;
+		Random random = new Random();
 		try {
 			inputFile = new RandomAccessFile(input,"r");
 		} catch (FileNotFoundException e1) {
@@ -38,13 +38,14 @@ public class UDPFileSender implements Runnable {
 		System.out.println("SLURPING UP the file: " + filename + " === opened file: " + input);
 		System.out.println("Chunking and sending to: " + receiverPort);
 		
+		DatagramSocket succ = null;
 		byte[] filebytes = new byte[peer.getMSS()];
 		Integer dataLength = 0;
 		try {
 			Boolean done = false;
 			Integer sequenceNum = 0;
 
-			DatagramSocket succ = null;
+			succ = new DatagramSocket();
 			InetAddress addr = null;
 			try {
 				addr = InetAddress.getByName("localhost");
@@ -53,49 +54,48 @@ public class UDPFileSender implements Runnable {
 			}
 			while (!done) {
 				dataLength = inputFile.read(filebytes);
-			    if (dataLength == -1) {
+			    if (dataLength == -1) { //catch the end of file, modify to keep sequence numbers consistent
 					//System.out.println("writing range " + i + " to " + (f_length - 1));
+			    	dataLength = 0;
 			    	done = true;
-			    } else {
-			    	ByteBuffer bufferino = ByteBuffer.allocate(4).putInt(sequenceNum);
-					byte[] seqBytes = bufferino.array();
-					byte[] buf = new byte[dataLength + seqBytes.length];
-					System.arraycopy(seqBytes, 0, buf, 0, seqBytes.length);
-					System.arraycopy(filebytes, 0, buf, seqBytes.length, filebytes.length);
-					DatagramPacket pingPacket = new DatagramPacket(buf, buf.length, addr, receiverPort);
-					
-					/*
-					 * send packet
-					 * wait for 0.5 seconds for reply with correct sequence number
-					 * if (timeout) {
-					 * 		resend same packet
-					 * } else (response received) {
-					 * 		update sequenceNum
-					 * }
-					 */
-					sequenceNum = sequenceNum + dataLength;
-			    }
+			    } 
+			    
+			    ByteBuffer bufferino = ByteBuffer.allocate(4).putInt(sequenceNum);
+				byte[] seqBytes = bufferino.array();
+				byte[] buf = new byte[dataLength + seqBytes.length];
+				System.arraycopy(seqBytes, 0, buf, 0, seqBytes.length);
+				System.arraycopy(filebytes, 0, buf, seqBytes.length, dataLength);
+				DatagramPacket filePacket = new DatagramPacket(buf, buf.length, addr, receiverPort);
+				
+				byte[] ackBuf = new byte[4];
+				DatagramPacket ackPacket = new DatagramPacket(buf, ackBuf.length);
+				
+				Boolean response = false;
+				Integer expectedACK = sequenceNum + dataLength;
+				while(!response) {
+					try {
+						//calculate drop rate here
+						if (random.nextDouble() >= peer.getDropRate()) {
+							succ.send(filePacket);
+						}
+						succ.receive(ackPacket);
+						Integer ackNumber = ByteBuffer.wrap(ackBuf).getInt();
+						if (ackNumber == expectedACK) {
+							response = true;
+							sequenceNum = ackNumber;
+						}
+					} catch (SocketTimeoutException e) {
+						System.out.println("response timeout for packet with seq num: " + sequenceNum + " === resending");
+					}
+				}
+				sequenceNum = sequenceNum + dataLength;
 			}
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
+		} finally {
+			succ.close();
 		}
 		
-		//Finally send complete signal
-		
-		/*
-		succ = new DatagramSocket();
-		buf = (peer.getId().toString() + " request " + seq).getBytes();
-		DatagramPacket pingPacket = new DatagramPacket(buf, buf.length, addr, 50000 + destPort);
-		*/
-		// get File using fileNum
-		// process the file into chunks of size peer.getMSS()
-		// setup new datagram with sequence number (1 or 0) and byte[MSS]
-		// stop and wait protocol
-			// if ACK correctly received, send next chunk
-			// if ACK not received within timeout window, re-send chunk (Don't need to worry about duplicate acks)
-		// if file transfer complete, send DONE packet and wait for ACK
-		// re-send DONE packet is ACK timeout
-		// kill/close thread
 	}
 }

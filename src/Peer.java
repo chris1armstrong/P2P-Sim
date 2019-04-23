@@ -6,7 +6,7 @@ public class Peer {
 	private Integer successor1;
 	private Integer successor2;
 	private Integer MSS;
-	private Float dropRate;
+	private Double dropRate;
 	private DatagramSocket udpSocket;
 	private DatagramSocket udpFileRecSocket;
 	private Integer predecessor1;
@@ -21,7 +21,7 @@ public class Peer {
 		this.successor1 = Integer.parseInt(args[1]);
 		this.successor2 = Integer.parseInt(args[2]);
 		this.MSS = Integer.parseInt(args[3]);
-		this.dropRate = Float.parseFloat(args[4]);
+		this.dropRate = Double.parseDouble(args[4]);
 		try {
 			this.udpSocket = new DatagramSocket(50000 + this.id);
 		} catch (SocketException e) {
@@ -62,7 +62,7 @@ public class Peer {
 		return MSS;
 	}
 
-	public Float getDropRate() {
+	public Double getDropRate() {
 		return dropRate;
 	}
 
