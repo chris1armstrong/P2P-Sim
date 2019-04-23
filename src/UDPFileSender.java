@@ -46,6 +46,7 @@ public class UDPFileSender implements Runnable {
 			Integer sequenceNum = 0;
 
 			succ = new DatagramSocket();
+			succ.setSoTimeout(1000);
 			InetAddress addr = null;
 			try {
 				addr = InetAddress.getByName("localhost");
@@ -54,14 +55,16 @@ public class UDPFileSender implements Runnable {
 			}
 			while (!done) {
 				dataLength = inputFile.read(filebytes);
+				System.out.println("I read in " + dataLength + " bytes");
 			    if (dataLength == -1) { //catch the end of file, modify to keep sequence numbers consistent
-					//System.out.println("writing range " + i + " to " + (f_length - 1));
+					System.out.println("I read nothing, file end");
 			    	dataLength = 0;
 			    	done = true;
 			    } 
 			    
 			    ByteBuffer bufferino = ByteBuffer.allocate(4).putInt(sequenceNum);
 				byte[] seqBytes = bufferino.array();
+				System.out.println("buf length = " + (dataLength + seqBytes.length));
 				byte[] buf = new byte[dataLength + seqBytes.length];
 				System.arraycopy(seqBytes, 0, buf, 0, seqBytes.length);
 				System.arraycopy(filebytes, 0, buf, seqBytes.length, dataLength);
@@ -74,13 +77,21 @@ public class UDPFileSender implements Runnable {
 				Integer expectedACK = sequenceNum + dataLength;
 				while(!response) {
 					try {
+
+						System.out.println("sending file packet " + sequenceNum);
 						//calculate drop rate here
 						if (random.nextDouble() >= peer.getDropRate()) {
 							succ.send(filePacket);
 						}
 						succ.receive(ackPacket);
+						ackBuf = ackPacket.getData();
 						Integer ackNumber = ByteBuffer.wrap(ackBuf).getInt();
-						if (ackNumber == expectedACK) {
+						System.out.println("received ackNumber: " + ackNumber + " === expected: " + expectedACK);
+						if (!ackNumber.equals(expectedACK)) {
+							System.out.println("These are not equal :: received ackNumber: " + ackNumber + " === expected: " + expectedACK);
+						}
+						if (ackNumber.equals(expectedACK)) {
+							System.out.println("Received expected ACK, updating seqNum = " + ackNumber);
 							response = true;
 							sequenceNum = ackNumber;
 						}
@@ -88,7 +99,6 @@ public class UDPFileSender implements Runnable {
 						System.out.println("response timeout for packet with seq num: " + sequenceNum + " === resending");
 					}
 				}
-				sequenceNum = sequenceNum + dataLength;
 			}
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
