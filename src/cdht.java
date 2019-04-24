@@ -55,6 +55,7 @@ public class cdht {
 					e.printStackTrace();
 				}
 				breaker = false;
+				peer.setRunning(false);
 				
 			} else if (command[0].equals("request")) {
 				String fileNo = command[1];
