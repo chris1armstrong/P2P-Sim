@@ -55,7 +55,7 @@ public class UDPPing implements Runnable {
 				
 				//get the port number of the other peer, alternating between successors
 				if (alternate == 0) {
-					if (peer.getSequenceNum2() - peer.getTscSuc2() > 3) { //successor 2 has timed out
+					if (peer.getSequenceNum2() - peer.getTscSuc2() > 2) { //successor 2 has timed out
 						System.out.println("Peer " + peer.getSuccessor2() + " is no longer alive");
 						peerTimeout(destPort, peer.getSequenceNum2());
 						peer.setSequenceNum2(0);
@@ -65,8 +65,9 @@ public class UDPPing implements Runnable {
 					alternate = 1;
 					destPort = peer.getSuccessor2();
 				} else if (alternate == 1){
-					if (peer.getSequenceNum1() - peer.getTscSuc1() > 3) { //successor 1 has timed out
+					if (peer.getSequenceNum1() - peer.getTscSuc1() > 2) { //successor 1 has timed out
 						System.out.println("Peer " + peer.getSuccessor1() + " is no longer alive");
+						peerTimeout(destPort, peer.getSequenceNum1());
 						peer.setSequenceNum1(0);
 						peer.setSequenceNum2(0);
 					}
