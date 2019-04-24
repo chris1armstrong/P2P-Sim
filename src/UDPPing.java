@@ -25,6 +25,7 @@ public class UDPPing implements Runnable {
 		InetAddress addr = null; //Address of this machine
 		byte[] buf; //ping message in buffer
 		Integer seq = 0;
+		Integer alternate = 0;
 		
 		//Get address of this machine
 		try {
@@ -55,16 +56,17 @@ public class UDPPing implements Runnable {
 				Thread.sleep(5000);
 				
 				//get the port number of the other peer, alternating between successors
-				if (destPort == peer.getSuccessor1()) {
+				if (alternate == 0) {
 					if (peer.getSequenceNum2() - peer.getTscSuc2() > 3) { //successor 2 has timed out. send alternate request
 						peerTimeout(destPort, peer.getSequenceNum2());
 						peer.setSequenceNum2(0);
 					}
 					peer.incrementSequenceNum2();
 					seq = peer.getSequenceNum2();
+					alternate = 1;
 					destPort = peer.getSuccessor2();
 					System.out.println("current seq: " + seq + " - tscSuc2: " + peer.getTscSuc2() + " = " + (seq - peer.getTscSuc2()));
-				} else if (destPort == peer.getSuccessor2()){
+				} else if (alternate == 1){
 					if (peer.getSequenceNum1() - peer.getTscSuc1() > 3) { //successor 1 has timed out. send alternate request
 						peerTimeout(destPort,peer.getSequenceNum1());
 						peer.setSequenceNum1(0);
@@ -72,6 +74,7 @@ public class UDPPing implements Runnable {
 					}
 					peer.incrementSequenceNum1();
 					seq = peer.getSequenceNum1();
+					alternate = 0;
 					destPort = peer.getSuccessor1();
 					System.out.println("current seq: " + seq + " - tscSuc1: " + peer.getTscSuc1() + " = " + (seq - peer.getTscSuc1()));
 				}
