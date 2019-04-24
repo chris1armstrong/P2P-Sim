@@ -18,7 +18,7 @@ public class UDPFileReceiver implements Runnable {
 	@Override
 	public void run() {
 		DatagramSocket receiver = peer.getUdpFileRecSocket();
-		byte[] buf = new byte[peer.getMSS() + 4];
+		byte[] buf = new byte[peer.getMSS() + 12];
 		DatagramPacket packet = new DatagramPacket(buf, buf.length);
 		Boolean transferComplete = false;
 		FileOutputStream fileOut = null;
@@ -53,6 +53,7 @@ public class UDPFileReceiver implements Runnable {
 				Integer ackNum = seqNum + length;
 				
 				writer.write(event + " " + eventTime + " " + seqNum + " " + length + " 0");
+				writer.flush();
 				//System.out.println("ackNum= " + ackNum);
 				
 				ByteBuffer respMessage = ByteBuffer.wrap(new byte[12]);
@@ -71,6 +72,7 @@ public class UDPFileReceiver implements Runnable {
 				eventTime = System.currentTimeMillis() - peer.getStartTime();
 				event = "snd";
 				writer.write(event + " " + eventTime + " 0 0 " + ackNum);
+				writer.flush();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
