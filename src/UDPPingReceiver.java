@@ -85,7 +85,7 @@ public class UDPPingReceiver implements Runnable {
 					 * 	break;
 					 */
 					case "response":
-						System.out.print("A ping response message was received from Peer " + from);
+						System.out.println("A ping response message was received from Peer " + from);
 						if (from == peer.getSuccessor1()) {
 							peer.setTscSuc1(Integer.parseInt(message[2]));
 							//System.out.println("Setting tscSuc1 to " + message[2]);
