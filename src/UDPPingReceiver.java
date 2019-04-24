@@ -27,7 +27,7 @@ public class UDPPingReceiver implements Runnable {
 	 */
 	@Override
 	public void run() {
-		System.out.println("UDPPingReceiver started");
+		//System.out.println("UDPPingReceiver started");
 		byte[] receiveBuf = new byte[512]; //buffer that incoming data will be stored in
 		DatagramPacket pingReceive = new DatagramPacket(receiveBuf, 512); //Packet storing incoming packets
 		DatagramSocket receiveSocket = peer.getUdpSocket(); //The listening socket
@@ -36,16 +36,17 @@ public class UDPPingReceiver implements Runnable {
 		
 		//Message loop
 		while (true) {
-			System.out.println("Receiver waiting");
+			//System.out.println("Receiver waiting");
 			try {
 				receiveSocket.receive(pingReceive);
 				String[] message = new String(pingReceive.getData(),0,pingReceive.getLength()).trim().split("\\s+");
 				Integer from = Integer.parseInt(message[0]);
-				System.out.print("Packet received from peer " + from + " on port " + pingReceive.getPort() + ": "); 
-				System.out.println(message[1]);
+				//System.out.print("Packet received from peer " + from + " on port " + pingReceive.getPort() + ": "); 
+				//System.out.println(message[1]);
 				
 				switch (message[1]) {
 					case "request":
+						System.out.println("A ping request message was received from Peer " + from);
 						String pingResponse = (peer.getId() + " response " + message[2]);
 						byte[] outPingResponse = pingResponse.getBytes();
 						InetAddress requesterAddr = InetAddress.getByName("localhost");
@@ -54,25 +55,25 @@ public class UDPPingReceiver implements Runnable {
 						pingResponseSocket.send(pingResponsePack);
 						pingResponseSocket.close();
 						if (preFlag) {
-							System.out.print("preFlag set");
+							//System.out.print("preFlag set");
 							if (from == peer.getPredecessor1()) {
-								System.out.println(": RESET predecessor 2 (" + peer.getPredecessor2() + ") with " + preTemp);
+								//System.out.println(": RESET predecessor 2 (" + peer.getPredecessor2() + ") with " + preTemp);
 								peer.setPredecessor2(preTemp);
 							} else if (from == peer.getPredecessor2()) {
-								System.out.println(": RESET predecessor 1 (" + peer.getPredecessor1() + ") with " + preTemp);
+								//System.out.println(": RESET predecessor 1 (" + peer.getPredecessor1() + ") with " + preTemp);
 								peer.setPredecessor1(preTemp);
 							}
 							preFlag = false;
 						}
 						
 						if (peer.getPredecessor1() == -1) {
-							System.out.println("predecessor 1 not set...setting " + from);
+							//System.out.println("predecessor 1 not set...setting " + from);
 							peer.setPredecessor1(from);
 						} else if (peer.getPredecessor2() == -1) {
-							System.out.println("predecessor 2 not set...setting " + from);
+							//System.out.println("predecessor 2 not set...setting " + from);
 							peer.setPredecessor2(from);
 						} else if (from != peer.getPredecessor1() && from != peer.getPredecessor2()) {
-							System.out.println("new predecessor detected...saving " + from);
+							//System.out.println("new predecessor detected...saving " + from);
 							preTemp = from;
 							preFlag = true;
 						}
@@ -84,13 +85,13 @@ public class UDPPingReceiver implements Runnable {
 					 * 	break;
 					 */
 					case "response":
-						System.out.print("Ping response from " + from + ". ");
+						System.out.print("A ping response message was received from Peer " + from);
 						if (from == peer.getSuccessor1()) {
 							peer.setTscSuc1(Integer.parseInt(message[2]));
-							System.out.println("Setting tscSuc1 to " + message[2]);
+							//System.out.println("Setting tscSuc1 to " + message[2]);
 						} else if (from == peer.getSuccessor2()) {
 							peer.setTscSuc2(Integer.parseInt(message[2]));
-							System.out.println("Setting tscSuc2 to " + message[2]);
+							//System.out.println("Setting tscSuc2 to " + message[2]);
 						}
 						break;
 					/*	

@@ -19,7 +19,7 @@ public class UDPPing implements Runnable {
 	
 	@Override
 	public void run() {
-		System.out.println("UDPPing started");
+		//System.out.println("UDPPing started");
 		Integer destPort = peer.getSuccessor1(); //Initial successor peer
 		DatagramSocket succ = null; //Ping sent on this socket
 		InetAddress addr = null; //Address of this machine
@@ -40,7 +40,7 @@ public class UDPPing implements Runnable {
 				if (peer.getRunning() == false) {
 					break;
 				}
-				System.out.println("Ping " + (50000 + destPort));
+				//System.out.println("Ping " + (50000 + destPort));
 				//Get an unused socket and build the ping packet
 				succ = new DatagramSocket();
 				buf = (peer.getId().toString() + " request " + seq).getBytes();
@@ -65,7 +65,7 @@ public class UDPPing implements Runnable {
 					seq = peer.getSequenceNum2();
 					alternate = 1;
 					destPort = peer.getSuccessor2();
-					System.out.println("current seq: " + seq + " - tscSuc2: " + peer.getTscSuc2() + " = " + (seq - peer.getTscSuc2()));
+					//System.out.println("current seq: " + seq + " - tscSuc2: " + peer.getTscSuc2() + " = " + (seq - peer.getTscSuc2()));
 				} else if (alternate == 1){
 					if (peer.getSequenceNum1() - peer.getTscSuc1() > 3) { //successor 1 has timed out. send alternate request
 						peerTimeout(destPort,peer.getSequenceNum1());
@@ -76,7 +76,7 @@ public class UDPPing implements Runnable {
 					seq = peer.getSequenceNum1();
 					alternate = 0;
 					destPort = peer.getSuccessor1();
-					System.out.println("current seq: " + seq + " - tscSuc1: " + peer.getTscSuc1() + " = " + (seq - peer.getTscSuc1()));
+					//System.out.println("current seq: " + seq + " - tscSuc1: " + peer.getTscSuc1() + " = " + (seq - peer.getTscSuc1()));
 				}
 				
 				//close the socket
@@ -89,18 +89,18 @@ public class UDPPing implements Runnable {
 
 	private void peerTimeout(Integer destPort, Integer seq) { //Sends message to successor requesting its neighbours
 		Socket nextPeer;
-		System.out.println("TCP sending peer getSuccessors request");
+		//System.out.println("TCP sending peer getSuccessors request");
 		try {
 			nextPeer = new Socket("localhost",50000 + destPort);
-			System.out.println("Socket Bound: " + (50000 + destPort));
+			//System.out.println("Socket Bound: " + (50000 + destPort));
 			DataOutputStream outToPeer = new DataOutputStream(nextPeer.getOutputStream());
 			DataInputStream inFromPeer = new DataInputStream(nextPeer.getInputStream());
 			BufferedReader receiveRead = new BufferedReader(new InputStreamReader(inFromPeer));
 			String request = new String(peer.getId() + " getSuccessors");
 			outToPeer.writeBytes(request + '\n');
-			System.out.println("Message sent");
+			//System.out.println("Message sent");
 			String received = receiveRead.readLine();
-			System.out.println("Message received: " + received);
+			//System.out.println("Message received: " + received);
 			nextPeer.close();
 			
 			String[] message = received.split("\\s+");
@@ -109,7 +109,7 @@ public class UDPPing implements Runnable {
 				peer.setSuccessor2(Integer.parseInt(message[2]));
 				peer.setTscSuc1(0);
 				peer.setTscSuc2(0);
-				System.out.println("Peer is successor 1. It has timed out. New succ1 = " + peer.getSuccessor1() + ". New succ2 = " + peer.getSuccessor2());
+				//System.out.println("Peer is successor 1. It has timed out. New succ1 = " + peer.getSuccessor1() + ". New succ2 = " + peer.getSuccessor2());
 			} else if (destPort == peer.getSuccessor1()) {
 				if (Integer.parseInt(message[2]) != peer.getSuccessor2()) { 
 					peer.setSuccessor2(Integer.parseInt(message[2])); //successor has already updated its neighbour list, take its 1st successor
@@ -117,7 +117,7 @@ public class UDPPing implements Runnable {
 					peer.setSuccessor2(Integer.parseInt(message[3])); //successor has not updated its neighbour yet, take its 2nd successor
 				}
 				peer.setTscSuc2(0);
-				System.out.println("Peer is successor 2. It has timed out. New succ2 = " + peer.getSuccessor2());
+				//System.out.println("Peer is successor 2. It has timed out. New succ2 = " + peer.getSuccessor2());
 			}
 			
 		} catch (IOException e) {
