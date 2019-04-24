@@ -27,6 +27,7 @@ public class UDPFileReceiver implements Runnable {
 		String event = null;
 		Long eventTime = 0L;
 		Integer length = 0;
+		
 		try {
 			writer = new BufferedWriter(new FileWriter(logname));
 		} catch (IOException e2) {
@@ -39,7 +40,6 @@ public class UDPFileReceiver implements Runnable {
 		}
 		
 		while (!transferComplete) {
-			System.out.println("waiting for file packet");
 			try {
 				receiver.receive(packet);
 				eventTime = System.currentTimeMillis() - peer.getStartTime();
@@ -48,13 +48,11 @@ public class UDPFileReceiver implements Runnable {
 				input = packet.getData();
 				ByteBuffer data = ByteBuffer.wrap(input);
 				Integer seqNum = data.getInt();
-				System.out.println("Received packet seq= " + seqNum + " === received packet length = " + packet.getLength());
 				length = packet.getLength() - 12;
 				Integer ackNum = seqNum + length;
 				
 				writer.write(event + " " + eventTime + " " + seqNum + " " + length + " 0\n");
 				writer.flush();
-				//System.out.println("ackNum= " + ackNum);
 				
 				ByteBuffer respMessage = ByteBuffer.wrap(new byte[12]);
 				respMessage.putInt(0);
@@ -78,10 +76,5 @@ public class UDPFileReceiver implements Runnable {
 			}
 		}
 		receiver.close();
-		// listen for datagrams on unused port from Peer object
-		// save sent data if applicable (if packet sequence is expected)
-		// setup new datagram with return address socket
-		// send ACK to sender
-		// process saved data into file format ->export?
 	}
 }

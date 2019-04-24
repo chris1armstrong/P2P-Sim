@@ -42,10 +42,6 @@ public class UDPFileSender implements Runnable {
 		} catch (FileNotFoundException e1) {
 			e1.printStackTrace();
 		}
-		
-		//System.out.println("Peer: " + peer.getId() + " file sender thread started");
-		//System.out.println("SLURPING UP the file: " + filename + " === opened file: " + input);
-		//System.out.println("Chunking and sending to: " + receiverPort);
 		System.out.println("We now start sending the file .........");
 		
 		DatagramSocket succ = null;
@@ -65,9 +61,7 @@ public class UDPFileSender implements Runnable {
 			}
 			while (!done) {
 				dataLength = inputFile.read(filebytes);
-				System.out.println("I read in " + dataLength + " bytes");
 			    if (dataLength == -1) { //catch the end of file, modify to keep sequence numbers consistent
-					//System.out.println("I read nothing, file end");
 			    	dataLength = 0;
 			    	done = true;
 			    } 
@@ -78,7 +72,7 @@ public class UDPFileSender implements Runnable {
 			    bufferino.putInt(ackNumber);
 			    bufferino.putInt(peer.getMSS());
 				byte[] seqBytes = bufferino.array();
-				System.out.println("buf length = " + (dataLength + seqBytes.length));
+
 				byte[] buf = new byte[dataLength + seqBytes.length];
 				System.arraycopy(seqBytes, 0, buf, 0, seqBytes.length);
 				System.arraycopy(filebytes, 0, buf, seqBytes.length, dataLength);
@@ -92,8 +86,6 @@ public class UDPFileSender implements Runnable {
 				Integer retrans = 0;
 				while(!response) {
 					try {
-
-						//System.out.println("sending file packet " + sequenceNum);
 						//calculate drop rate here
 						if (random.nextDouble() >= peer.getDropRate()) {
 							succ.send(filePacket);
@@ -109,7 +101,7 @@ public class UDPFileSender implements Runnable {
 						Long eventTime = System.currentTimeMillis() - peer.getStartTime();
 						writer.write(event + " " + eventTime + " " + sequenceNum + " " + dataLength + " 0\n");
 						writer.flush();
-						//Log sent/dropped/RTXed packet here
+
 						succ.receive(ackPacket);
 						eventTime = System.currentTimeMillis() - peer.getStartTime();
 						event = "rcv";
@@ -120,14 +112,11 @@ public class UDPFileSender implements Runnable {
 						
 						writer.write(event + " " + eventTime + " " + tempSeqNum + " 0 " + ackNumber + "\n");
 						writer.flush();
-						System.out.println("received ackNumber: " + ackNumber + " === expected: " + expectedACK);
 						if (ackNumber.equals(expectedACK)) {
-							System.out.println("Received expected ACK, updating seqNum = " + ackNumber);
 							response = true;
 							sequenceNum = ackNumber;
 						}
 					} catch (SocketTimeoutException e) {
-						//System.out.println("response timeout for packet with seq num: " + sequenceNum + " === resending");
 					}
 				}
 				if (done) {
@@ -139,6 +128,5 @@ public class UDPFileSender implements Runnable {
 		} finally {
 			succ.close();
 		}
-		
 	}
 }

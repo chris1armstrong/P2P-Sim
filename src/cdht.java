@@ -13,13 +13,9 @@ public class cdht {
 		Thread tcpreceiver = new Thread(new TCPReceiver(peer));
 		Thread udppingrec = new Thread(new UDPPingReceiver(peer));
 		Thread udpping = new Thread(new UDPPing(peer));
-		
-		
 		tcpreceiver.start();
-		
 		udppingrec.start();
 		udpping.start();
-		
 		
 		Boolean breaker = true;
 		Scanner scan = new Scanner(System.in);
@@ -27,15 +23,13 @@ public class cdht {
 			String input = scan.nextLine();
 			String[] command = input.split("\\s+");
 			if (command[0].equals("quit")) {
-				//System.out.println("I'm ded");
-				// 2. "fromID departing succ1 succ2"
 				try {
 					if (peer.getPredecessor1() != -1) {
 						Socket request = null;
 						request = new Socket("localhost", 50000 + peer.getPredecessor1());
 						DataOutputStream requestOut = new DataOutputStream(request.getOutputStream());
+						//"fromID departing succ1 succ2"
 						String b = new String(peer.getId() + " departing " + peer.getSuccessor1() + " " + peer.getSuccessor2());
-						//System.out.println("Sending message: " + b);
 						requestOut.writeBytes(b + '\n');
 						request.close();
 						breaker = false;
@@ -45,7 +39,6 @@ public class cdht {
 						request = new Socket("localhost", 50000 + peer.getPredecessor2());
 						DataOutputStream requestOut = new DataOutputStream(request.getOutputStream());
 						String b = new String(peer.getId() + " departing " + peer.getSuccessor1() + " " + peer.getSuccessor2());
-						//System.out.println("Sending message: " + b);
 						requestOut.writeBytes(b + '\n');
 						request.close();
 						breaker = false;
@@ -59,8 +52,6 @@ public class cdht {
 				
 			} else if (command[0].equals("request")) {
 				String fileNo = command[1];
-				//System.out.println("File num = " + fileNo);
-				//System.out.println("File num as Integer = " + Integer.parseInt(fileNo));
 				Socket request = null;
 				
 				try {
@@ -70,9 +61,9 @@ public class cdht {
 					
 					request = new Socket("localhost", 50000 + peer.getSuccessor1());
 					DataOutputStream outToClient = new DataOutputStream(request.getOutputStream());
+					//message style: "fromID request origin fileNo UDPFileReceiverPort"
 					String b = new String(peer.getId() + " request " + peer.getId() + " " + fileNo + " " + peer.getUdpFileRecSocket().getLocalPort());
 					System.out.println("File request message for " + fileNo + " has been sent to my successor");
-					//message style: "fromID request origin fileNo UDPFileReceiverPort"
 					outToClient.writeBytes(b + '\n');
 					request.close();
 					
@@ -84,15 +75,7 @@ public class cdht {
 			}
 		}
 		scan.close();
-		// start receiver thread;
-		// start ping threads; one for each successor
-		// wait for command line input
-		// 	 quit -> send message to predecessors
-		//   get file -> setup tcp to appropriate successor
-		//		wait for response containing peer with file
-		//		setup UDP exchange, get and receive.
 	}
-
 }
 
 

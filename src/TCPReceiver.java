@@ -14,15 +14,12 @@ public class TCPReceiver implements Runnable {
 	@Override
 	public void run() {
 		ServerSocket tcpReceiver = null;
-		//tcpReceiver.setReuseAddress(true);
-		//System.out.println(peer.getId());
 		try {
 			tcpReceiver = new ServerSocket(50000 + peer.getId());
 			while(true) {
 				if (peer.getRunning() == false) {
 					break;
 				}
-				//System.out.println("TCPSocket bound, waiting for connection");
 				Socket peerConnection = tcpReceiver.accept();
 				DataInputStream inStream = new DataInputStream(peerConnection.getInputStream());
 				BufferedReader inFromClient = new BufferedReader(new InputStreamReader(inStream));
@@ -31,12 +28,10 @@ public class TCPReceiver implements Runnable {
 				
 				String inputString = inFromClient.readLine();
 				String[] message = inputString.split("\\s+");
-				//System.out.println("Received: " + inputString);
 				Integer from = Integer.parseInt(message[0]);
 				
 				switch (message[1]) {
 				case "getSuccessors":
-					//System.out.println("Successors requested by peer " + message[0]);
 					String reply = new String(peer.getId() + " mySuccessors " + peer.getSuccessor1() + " " + peer.getSuccessor2());
 					outToClient.writeBytes(reply + '\n');
 					break;
@@ -68,13 +63,10 @@ public class TCPReceiver implements Runnable {
 					Boolean mine = false;
 					if (locator <= peer.getId() && locator > from) {
 						mine = true;
-						//I have it
 					} else if (locator > from && peer.getId() < from) {
 						mine = true;
-						//I have it
 					} else if (locator < from && locator <= peer.getId() && peer.getId() < from){
 						mine = true;
-						//I have it
 					} else {
 						//Establish TCP connection to port 50000 + peer.getSuccessor1()
 						InetAddress forwardAddr = InetAddress.getByName("localhost");
@@ -102,7 +94,6 @@ public class TCPReceiver implements Runnable {
 						Integer receiverPort = Integer.parseInt(message[4]);
 						Thread sender = new Thread(new UDPFileSender(peer, message[3], receiverPort));
 						sender.start();
-						//System.out.println("I have the file " + fileNum);
 					}
 					break;
 				case "confirm":
@@ -111,7 +102,6 @@ public class TCPReceiver implements Runnable {
 								", which has the file "+ Integer.parseInt(message[2]));
 					break;
 				}
-
 				/*
 				 * message types:
 				 * 1. "fromID getSuccessors"
@@ -121,7 +111,6 @@ public class TCPReceiver implements Runnable {
 				 */
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -129,9 +118,7 @@ public class TCPReceiver implements Runnable {
 			tcpReceiver.close();
 			System.out.println("I've closed up");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-
 }

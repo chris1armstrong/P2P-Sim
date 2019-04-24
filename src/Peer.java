@@ -27,7 +27,6 @@ public class Peer {
 		try {
 			this.udpSocket = new DatagramSocket(50000 + this.id);
 		} catch (SocketException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		this.predecessor1 = -1;
@@ -74,99 +73,79 @@ public class Peer {
 		return udpSocket;
 	}
 
-
 	public synchronized Integer getPredecessor2() {
 		return predecessor2;
 	}
-
 
 	public synchronized void setPredecessor2(Integer predecessor2) {
 		this.predecessor2 = predecessor2;
 	}
 
-
 	public synchronized Integer getPredecessor1() {
 		return predecessor1;
 	}
-
 
 	public synchronized void setPredecessor1(Integer predecessor1) {
 		this.predecessor1 = predecessor1;
 	}
 
-
 	public synchronized Integer getTscSuc1() {
 		return tscSuc1;
 	}
-
 
 	public synchronized void setTscSuc1(Integer l) {
 		this.tscSuc1 = l;
 	}
 
-
 	public synchronized Integer getTscSuc2() {
 		return tscSuc2;
 	}
-
 
 	public synchronized void setTscSuc2(Integer l) {
 		this.tscSuc2 = l;
 	}
 
-
 	public synchronized Integer getSequenceNum1() {
 		return sequenceNum1;
 	}
-
 
 	public synchronized void setSequenceNum1(Integer sequenceNum1) {
 		this.sequenceNum1 = sequenceNum1;
 	}
 	
-	
 	public synchronized void incrementSequenceNum1() {
 		this.sequenceNum1++;
 	}
-
 	
 	public synchronized Integer getSequenceNum2() {
 		return sequenceNum2;
 	}
 
-
 	public synchronized void setSequenceNum2(Integer sequenceNum2) {
 		this.sequenceNum2 = sequenceNum2;
 	}
-
 	
 	public synchronized void incrementSequenceNum2() {
 		this.sequenceNum2++;
 	}
 
-
 	public DatagramSocket getUdpFileRecSocket() {
 		return udpFileRecSocket;
 	}
-
 
 	public void setUdpFileRecSocket(DatagramSocket udpFileRecSocket) {
 		this.udpFileRecSocket = udpFileRecSocket;
 	}
 
-
 	public synchronized Boolean getRunning() {
 		return running;
 	}
-
 
 	public synchronized void setRunning(Boolean running) {
 		this.running = running;
 	}
 
-
 	public Long getStartTime() {
 		return startTime;
 	}
-
 }
