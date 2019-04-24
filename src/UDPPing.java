@@ -36,7 +36,7 @@ public class UDPPing implements Runnable {
 		//Pinging loop
 		try {
 			while (true) {
-				if (peer.getRunning() == false) {
+				if (peer.getRunning() == false) { //check if kill flag is set
 					break;
 				}
 				//Get an unused socket and build the ping packet
@@ -55,7 +55,7 @@ public class UDPPing implements Runnable {
 				
 				//get the port number of the other peer, alternating between successors
 				if (alternate == 0) {
-					if (peer.getSequenceNum2() - peer.getTscSuc2() > 3) { //successor 2 has timed out. send alternate request
+					if (peer.getSequenceNum2() - peer.getTscSuc2() > 3) { //successor 2 has timed out
 						System.out.println("Peer " + peer.getSuccessor2() + " is no longer alive");
 						peerTimeout(destPort, peer.getSequenceNum2());
 						peer.setSequenceNum2(0);
@@ -65,7 +65,7 @@ public class UDPPing implements Runnable {
 					alternate = 1;
 					destPort = peer.getSuccessor2();
 				} else if (alternate == 1){
-					if (peer.getSequenceNum1() - peer.getTscSuc1() > 3) { //successor 1 has timed out. send alternate request
+					if (peer.getSequenceNum1() - peer.getTscSuc1() > 3) { //successor 1 has timed out
 						System.out.println("Peer " + peer.getSuccessor1() + " is no longer alive");
 						peer.setSequenceNum1(0);
 						peer.setSequenceNum2(0);
@@ -85,16 +85,16 @@ public class UDPPing implements Runnable {
 
 	private void peerTimeout(Integer destPort, Integer seq) { //Sends message to successor requesting its neighbours
 		Socket nextPeer;
-		try {
+		try { //request your peer's successors, so this peer can update its successors
 			nextPeer = new Socket("localhost",50000 + destPort);
 			DataOutputStream outToPeer = new DataOutputStream(nextPeer.getOutputStream());
 			DataInputStream inFromPeer = new DataInputStream(nextPeer.getInputStream());
 			BufferedReader receiveRead = new BufferedReader(new InputStreamReader(inFromPeer));
 			String request = new String(peer.getId() + " getSuccessors");
 			outToPeer.writeBytes(request + '\n');
+			// receive and parse the response message
 			String received = receiveRead.readLine();
 			nextPeer.close();
-			
 			String[] message = received.split("\\s+");
 			if (destPort == peer.getSuccessor2()) {
 				peer.setSuccessor1(peer.getSuccessor2());
@@ -104,10 +104,11 @@ public class UDPPing implements Runnable {
 				System.out.println("My first successor is now peer " + peer.getSuccessor1());
 				System.out.println("My second successor is now peer " + peer.getSuccessor2());
 			} else if (destPort == peer.getSuccessor1()) {
-				if (Integer.parseInt(message[2]) != peer.getSuccessor2()) { 
-					peer.setSuccessor2(Integer.parseInt(message[2])); //successor has already updated its neighbour list, take its 1st successor
-				} else {
-					peer.setSuccessor2(Integer.parseInt(message[3])); //successor has not updated its neighbour yet, take its 2nd successor
+				if (Integer.parseInt(message[2]) != peer.getSuccessor2()) {
+					//successor has already updated its neighbour list, take its 1st successor
+					peer.setSuccessor2(Integer.parseInt(message[2])); 
+				} else {//successor has not updated its neighbour yet, take its 2nd successor
+					peer.setSuccessor2(Integer.parseInt(message[3])); 
 				}
 				peer.setTscSuc2(0);
 

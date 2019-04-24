@@ -15,27 +15,27 @@ public class TCPReceiver implements Runnable {
 	public void run() {
 		ServerSocket tcpReceiver = null;
 		try {
-			tcpReceiver = new ServerSocket(50000 + peer.getId());
+			tcpReceiver = new ServerSocket(50000 + peer.getId()); //Bind TCP socket to this peer's tcpreceiver
 			while(true) {
-				if (peer.getRunning() == false) {
+				if (peer.getRunning() == false) { //check if the peer is departing
 					break;
 				}
+				//get a connection, establish inputs and output streams
 				Socket peerConnection = tcpReceiver.accept();
 				DataInputStream inStream = new DataInputStream(peerConnection.getInputStream());
 				BufferedReader inFromClient = new BufferedReader(new InputStreamReader(inStream));
-				
 				DataOutputStream outToClient = new DataOutputStream(peerConnection.getOutputStream());
-				
+				//parse the tcp message
 				String inputString = inFromClient.readLine();
 				String[] message = inputString.split("\\s+");
 				Integer from = Integer.parseInt(message[0]);
-				
+				//execute behaviour based on message
 				switch (message[1]) {
-				case "getSuccessors":
+				case "getSuccessors": //a peer has asked this peer for its successors
 					String reply = new String(peer.getId() + " mySuccessors " + peer.getSuccessor1() + " " + peer.getSuccessor2());
 					outToClient.writeBytes(reply + '\n');
 					break;
-				case "departing":
+				case "departing": //one of this peers successors is departing, updating successors
 					if (from == peer.getSuccessor1()) {
 						peer.setSuccessor1(Integer.parseInt(message[2]));
 						peer.setSuccessor2(Integer.parseInt(message[3]));
@@ -55,19 +55,19 @@ public class TCPReceiver implements Runnable {
 						System.out.println("My second successor is now peer " + peer.getSuccessor2());
 					}
 					break;
-				case "request":
+				case "request": //a peer has made a file request to me
 					Integer origin = Integer.parseInt(message[2]);
 					Integer fileNum = Integer.parseInt(message[3]);
 					Integer originFileReceiverPort = Integer.parseInt(message[4]);
 					Integer locator = fileNum%255;
-					Boolean mine = false;
-					if (locator <= peer.getId() && locator > from) {
+					Boolean mine = false; //checking if this peer has the file
+					if (locator <= peer.getId() && locator > from) { 
 						mine = true;
 					} else if (locator > from && peer.getId() < from) {
 						mine = true;
 					} else if (locator < from && locator <= peer.getId() && peer.getId() < from){
 						mine = true;
-					} else {
+					} else { //this peer did NOT have the file, forward the request
 						//Establish TCP connection to port 50000 + peer.getSuccessor1()
 						InetAddress forwardAddr = InetAddress.getByName("localhost");
 						Socket forward = new Socket(forwardAddr, 50000 + peer.getSuccessor1());
@@ -80,7 +80,7 @@ public class TCPReceiver implements Runnable {
 						System.out.println("File " + message[3] + " is not stored here");
 						System.out.println("File request message has been forwarded to my successor");
 					}
-					if (mine) {
+					if (mine) { //This peer does have the file
 						//Establish connection to origin TCP port, send confirmation
 						System.out.println("File " + message[3] + " is here");
 						InetAddress confirmAddr = InetAddress.getByName("localhost");
@@ -96,8 +96,7 @@ public class TCPReceiver implements Runnable {
 						sender.start();
 					}
 					break;
-				case "confirm":
-					//received confirmation message from peer holding requested fileNo
+				case "confirm":	//received confirmation message from peer holding requested fileNo
 					System.out.println("Received a response message from peer " + Integer.parseInt(message[0]) + 
 								", which has the file "+ Integer.parseInt(message[2]));
 					break;
@@ -107,7 +106,7 @@ public class TCPReceiver implements Runnable {
 				 * 1. "fromID getSuccessors"
 				 * 2. "fromID departing succ1 succ2"
 				 * 3. "fromID request origin fileNo UDPFileReceiverPort"
-				 * 4. "fromID confirm fileNo" ??
+				 * 4. "fromID confirm fileNo"
 				 */
 			}
 		} catch (IOException e) {
@@ -116,7 +115,6 @@ public class TCPReceiver implements Runnable {
 		
 		try {
 			tcpReceiver.close();
-			System.out.println("I've closed up");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

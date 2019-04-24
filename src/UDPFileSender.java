@@ -24,7 +24,7 @@ public class UDPFileSender implements Runnable {
 	}
 	
 	@Override
-	public void run() {
+	public void run() { //setup log file and parse file to be sent
 		String filename = fileNum + ".pdf";
 		String logname = "responding_log.txt";
 		File input = new File(filename);
@@ -43,14 +43,14 @@ public class UDPFileSender implements Runnable {
 			e1.printStackTrace();
 		}
 		System.out.println("We now start sending the file .........");
-		
+		//setup up datagram socket and sending buffer
 		DatagramSocket succ = null;
 		byte[] filebytes = new byte[peer.getMSS()];
 		Integer dataLength = 0;
 		try {
 			Boolean done = false;
 			Integer sequenceNum = 1;
-
+			//setup socket ready for sending
 			succ = new DatagramSocket();
 			succ.setSoTimeout(1000);
 			InetAddress addr = null;
@@ -59,34 +59,34 @@ public class UDPFileSender implements Runnable {
 			} catch (UnknownHostException e) {
 				e.printStackTrace();
 			}
-			while (!done) {
-				dataLength = inputFile.read(filebytes);
+			while (!done) { //while the file has not been received in full
+				dataLength = inputFile.read(filebytes); // read in the next chunk
 			    if (dataLength == -1) { //catch the end of file, modify to keep sequence numbers consistent
 			    	dataLength = 0;
 			    	done = true;
 			    } 
-
+			    //setup header information
 				Integer ackNumber = 0;
 			    ByteBuffer bufferino = ByteBuffer.allocate(12);
 			    bufferino.putInt(sequenceNum);
 			    bufferino.putInt(ackNumber);
 			    bufferino.putInt(peer.getMSS());
 				byte[] seqBytes = bufferino.array();
-
+				//combine the header and data into the packet
 				byte[] buf = new byte[dataLength + seqBytes.length];
 				System.arraycopy(seqBytes, 0, buf, 0, seqBytes.length);
 				System.arraycopy(filebytes, 0, buf, seqBytes.length, dataLength);
 				DatagramPacket filePacket = new DatagramPacket(buf, buf.length, addr, receiverPort);
-				
+				//prepare ACK receiver buffer & packet
 				byte[] ackBuf = new byte[12];
 				DatagramPacket ackPacket = new DatagramPacket(buf, ackBuf.length);
-				
+				//setup this packet's expected ACK number
 				Boolean response = false;
 				Integer expectedACK = sequenceNum + dataLength;
 				Integer retrans = 0;
-				while(!response) {
+				while(!response) { //loop until the correct ACK is received
 					try {
-						//calculate drop rate here
+						//calculate drop rate here, and log message
 						if (random.nextDouble() >= peer.getDropRate()) {
 							succ.send(filePacket);
 							if (retrans > 0) {
@@ -106,6 +106,7 @@ public class UDPFileSender implements Runnable {
 							writer.write(event + " " + eventTime + " " + sequenceNum + " " + dataLength + " 0\n");
 							writer.flush();
 						}
+						//wait to receive the ACK packet, then generate log message
 						succ.receive(ackPacket);
 						eventTime = System.currentTimeMillis() - peer.getStartTime();
 						event = "rcv";
@@ -118,11 +119,11 @@ public class UDPFileSender implements Runnable {
 							writer.write(event + " " + eventTime + " " + tempSeqNum + " " + tempLength + " " + ackNumber + "\n");
 							writer.flush();
 						}
-						if (ackNumber.equals(expectedACK)) {
+						if (ackNumber.equals(expectedACK)) { // packet was successfully received, setup next packet sequence number
 							response = true;
 							sequenceNum = ackNumber;
 						}
-					} catch (SocketTimeoutException e) {
+					} catch (SocketTimeoutException e) {//catch the timeout to allow the loop to continue
 					}
 				}
 				if (done) {

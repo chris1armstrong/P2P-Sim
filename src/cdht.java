@@ -8,7 +8,8 @@ import java.util.*;
 public class cdht {
 	
 	public static void main(String[] args) {
-
+		
+		//initilise peer and start tcp receiver, udp ping receiver and udp ping threads.
 		Peer peer = new Peer(args);
 		Thread tcpreceiver = new Thread(new TCPReceiver(peer));
 		Thread udppingrec = new Thread(new UDPPingReceiver(peer));
@@ -19,11 +20,11 @@ public class cdht {
 		
 		Boolean breaker = true;
 		Scanner scan = new Scanner(System.in);
-		while(breaker) {
+		while(breaker) { //start scanning command line input for instructions
 			String input = scan.nextLine();
 			String[] command = input.split("\\s+");
-			if (command[0].equals("quit")) {
-				try {
+			if (command[0].equals("quit")) { //user typed "quit" command
+				try { //Tells its registered predecessors that the peer is leaving
 					if (peer.getPredecessor1() != -1) {
 						Socket request = null;
 						request = new Socket("localhost", 50000 + peer.getPredecessor1());
@@ -48,17 +49,17 @@ public class cdht {
 					e.printStackTrace();
 				}
 				breaker = false;
-				peer.setRunning(false);
+				peer.setRunning(false); //set the running flag to false, to stop all threads
 				
-			} else if (command[0].equals("request")) {
+			} else if (command[0].equals("request")) { //user entered "request" command for a file
 				String fileNo = command[1];
 				Socket request = null;
 				
-				try {
-					peer.setUdpFileRecSocket(new DatagramSocket());
+				try {//start the File receiver thread
+					peer.setUdpFileRecSocket(new DatagramSocket()); 
 					Thread udpfilereceiver = new Thread(new UDPFileReceiver(peer));
 					udpfilereceiver.start();
-					
+					//Send file request to the first successor
 					request = new Socket("localhost", 50000 + peer.getSuccessor1());
 					DataOutputStream outToClient = new DataOutputStream(request.getOutputStream());
 					//message style: "fromID request origin fileNo UDPFileReceiverPort"

@@ -16,7 +16,7 @@ public class UDPFileReceiver implements Runnable {
 	}
 	
 	@Override
-	public void run() {
+	public void run() { //setup receiver buffer, logfile etc
 		DatagramSocket receiver = peer.getUdpFileRecSocket();
 		byte[] buf = new byte[peer.getMSS() + 12];
 		DatagramPacket packet = new DatagramPacket(buf, buf.length);
@@ -39,8 +39,8 @@ public class UDPFileReceiver implements Runnable {
 			e1.printStackTrace();
 		}
 		
-		while (!transferComplete) {
-			try {
+		while (!transferComplete) { //while there is still file left to receive
+			try { // receive the incoming packet, generate log message
 				receiver.receive(packet);
 				eventTime = System.currentTimeMillis() - peer.getStartTime();
 				event = "rcv";
@@ -54,23 +54,23 @@ public class UDPFileReceiver implements Runnable {
 				if (length > 0) {
 					writer.write(event + " " + eventTime + " " + seqNum + " " + length + " 0\n");
 					writer.flush();
-				}
+				}// generate response (ACK) message
 				ByteBuffer respMessage = ByteBuffer.wrap(new byte[12]);
 				respMessage.putInt(0);
 				respMessage.putInt(ackNum);
 				respMessage.putInt(length);
 				byte[] outBuf = respMessage.array();
 				DatagramPacket response = new DatagramPacket(outBuf, outBuf.length, packet.getSocketAddress());
-				if (packet.getLength() == 12) { //length of lone sequence Num
+				if (packet.getLength() == 12) { //length of header w/ no data
 					System.out.println("The file is received");
 					transferComplete = true;
-				} else {
+				} else { //write data out to the receive file
 					fileOut.write(Arrays.copyOfRange(input, 12, packet.getLength()));
 				}
-				receiver.send(response);
+				receiver.send(response); // send response message
 				eventTime = System.currentTimeMillis() - peer.getStartTime();
 				event = "snd";
-				
+				//record send in log
 				if (length > 0) {
 					writer.write(event + " " + eventTime + " 0 " + length + " " + ackNum + "\n");
 					writer.flush();

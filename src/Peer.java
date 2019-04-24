@@ -40,7 +40,7 @@ public class Peer {
 		this.startTime = System.currentTimeMillis();
 	}
 	
-
+	//The setter/getter methods for peer object's properties
 	public Integer getId() {
 		return id;
 	}
