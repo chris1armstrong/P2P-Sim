@@ -101,10 +101,10 @@ public class UDPFileSender implements Runnable {
 								event = "RTX";
 							} else {
 								event = "snd";
-								retrans = 1;
 							}
 						} else {
 							event = "drop";
+							retrans = 1;
 						}
 						Long eventTime = System.currentTimeMillis() - peer.getStartTime();
 						writer.write(event + " " + eventTime + " " + sequenceNum + " " + dataLength + " 0\n");
