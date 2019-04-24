@@ -73,7 +73,7 @@ public class UDPFileSender implements Runnable {
 			    } 
 
 				Integer ackNumber = 0;
-			    ByteBuffer bufferino = ByteBuffer.allocate(4);
+			    ByteBuffer bufferino = ByteBuffer.allocate(12);
 			    bufferino.putInt(sequenceNum);
 			    bufferino.putInt(ackNumber);
 			    bufferino.putInt(peer.getMSS());
