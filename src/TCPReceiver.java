@@ -43,14 +43,14 @@ public class TCPReceiver implements Runnable {
 						peer.setSequenceNum1(0);
 						peer.setTscSuc2(0);
 						peer.setSequenceNum2(0);
-						System.out.print("Peer " + from + " will depart from the network");
+						System.out.println("Peer " + from + " will depart from the network");
 						System.out.println("My first successor is now peer " + peer.getSuccessor1());
 						System.out.println("My second successor is now peer " + peer.getSuccessor2());
 					} else if (from == peer.getSuccessor2()) {
 						peer.setSuccessor2(Integer.parseInt(message[2]));
 						peer.setTscSuc2(0);
 						peer.setSequenceNum2(0);
-						System.out.print("Peer " + from + " will depart from the network");
+						System.out.println("Peer " + from + " will depart from the network");
 						System.out.println("My first successor is now peer " + peer.getSuccessor1());
 						System.out.println("My second successor is now peer " + peer.getSuccessor2());
 					}
