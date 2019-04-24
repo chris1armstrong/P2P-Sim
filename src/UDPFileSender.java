@@ -65,7 +65,7 @@ public class UDPFileSender implements Runnable {
 			}
 			while (!done) {
 				dataLength = inputFile.read(filebytes);
-				//System.out.println("I read in " + dataLength + " bytes");
+				System.out.println("I read in " + dataLength + " bytes");
 			    if (dataLength == -1) { //catch the end of file, modify to keep sequence numbers consistent
 					//System.out.println("I read nothing, file end");
 			    	dataLength = 0;
@@ -78,7 +78,7 @@ public class UDPFileSender implements Runnable {
 			    bufferino.putInt(ackNumber);
 			    bufferino.putInt(peer.getMSS());
 				byte[] seqBytes = bufferino.array();
-				//System.out.println("buf length = " + (dataLength + seqBytes.length));
+				System.out.println("buf length = " + (dataLength + seqBytes.length));
 				byte[] buf = new byte[dataLength + seqBytes.length];
 				System.arraycopy(seqBytes, 0, buf, 0, seqBytes.length);
 				System.arraycopy(filebytes, 0, buf, seqBytes.length, dataLength);
@@ -118,9 +118,9 @@ public class UDPFileSender implements Runnable {
 						ackNumber = wrappedAckBuf.getInt();
 						
 						writer.write(event + " " + eventTime + " " + tempSeqNum + " 0 " + ackNumber);
-						//System.out.println("received ackNumber: " + ackNumber + " === expected: " + expectedACK);
+						System.out.println("received ackNumber: " + ackNumber + " === expected: " + expectedACK);
 						if (ackNumber.equals(expectedACK)) {
-							//System.out.println("Received expected ACK, updating seqNum = " + ackNumber);
+							System.out.println("Received expected ACK, updating seqNum = " + ackNumber);
 							response = true;
 							sequenceNum = ackNumber;
 						}

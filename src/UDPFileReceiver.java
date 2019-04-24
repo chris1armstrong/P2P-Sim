@@ -39,7 +39,7 @@ public class UDPFileReceiver implements Runnable {
 		}
 		
 		while (!transferComplete) {
-			//System.out.println("waiting for file packet");
+			System.out.println("waiting for file packet");
 			try {
 				receiver.receive(packet);
 				eventTime = System.currentTimeMillis() - peer.getStartTime();
@@ -48,7 +48,7 @@ public class UDPFileReceiver implements Runnable {
 				input = packet.getData();
 				ByteBuffer data = ByteBuffer.wrap(input);
 				Integer seqNum = data.getInt();
-				//System.out.println("Received packet seq= " + seqNum + " === received packet length = " + packet.getLength());
+				System.out.println("Received packet seq= " + seqNum + " === received packet length = " + packet.getLength());
 				length = packet.getLength() - 12;
 				Integer ackNum = seqNum + length;
 				
