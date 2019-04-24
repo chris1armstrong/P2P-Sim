@@ -51,13 +51,14 @@ public class UDPFileReceiver implements Runnable {
 				length = packet.getLength() - 12;
 				Integer ackNum = seqNum + length;
 				
-				writer.write(event + " " + eventTime + " " + seqNum + " " + length + " 0\n");
-				writer.flush();
-				
+				if (length > 0) {
+					writer.write(event + " " + eventTime + " " + seqNum + " " + length + " 0\n");
+					writer.flush();
+				}
 				ByteBuffer respMessage = ByteBuffer.wrap(new byte[12]);
 				respMessage.putInt(0);
 				respMessage.putInt(ackNum);
-				respMessage.putInt(peer.getMSS());
+				respMessage.putInt(length);
 				byte[] outBuf = respMessage.array();
 				DatagramPacket response = new DatagramPacket(outBuf, outBuf.length, packet.getSocketAddress());
 				if (packet.getLength() == 12) { //length of lone sequence Num
@@ -69,8 +70,11 @@ public class UDPFileReceiver implements Runnable {
 				receiver.send(response);
 				eventTime = System.currentTimeMillis() - peer.getStartTime();
 				event = "snd";
-				writer.write(event + " " + eventTime + " 0 0 " + ackNum + "\n");
-				writer.flush();
+				
+				if (length > 0) {
+					writer.write(event + " " + eventTime + " 0 " + length + " " + ackNum + "\n");
+					writer.flush();
+				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

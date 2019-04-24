@@ -111,9 +111,10 @@ public class UDPFileSender implements Runnable {
 						ackBuf = ackPacket.getData();
 						ByteBuffer wrappedAckBuf = ByteBuffer.wrap(ackBuf);
 						Integer tempSeqNum = wrappedAckBuf.getInt();
+						Integer tempLength = wrappedAckBuf.getInt();
 						ackNumber = wrappedAckBuf.getInt();
 						
-						writer.write(event + " " + eventTime + " " + tempSeqNum + " 0 " + ackNumber + "\n");
+						writer.write(event + " " + eventTime + " " + tempSeqNum + " " + tempLength + " " + ackNumber + "\n");
 						writer.flush();
 						if (ackNumber.equals(expectedACK)) {
 							response = true;
