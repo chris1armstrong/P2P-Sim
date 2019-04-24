@@ -66,7 +66,7 @@ public class UDPFileReceiver implements Runnable {
 					System.out.println("The file is received");
 					transferComplete = true;
 				} else {
-					fileOut.write(Arrays.copyOfRange(input, 4, packet.getLength()));;
+					fileOut.write(Arrays.copyOfRange(input, 12, packet.getLength()));;
 				}
 				receiver.send(response);
 				eventTime = System.currentTimeMillis() - peer.getStartTime();

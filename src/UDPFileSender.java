@@ -107,7 +107,7 @@ public class UDPFileSender implements Runnable {
 							event = "drop";
 						}
 						Long eventTime = System.currentTimeMillis() - peer.getStartTime();
-						writer.write(event + " " + eventTime + " " + sequenceNum + " " + dataLength + " 0");
+						writer.write(event + " " + eventTime + " " + sequenceNum + " " + dataLength + " 0\n");
 						writer.flush();
 						//Log sent/dropped/RTXed packet here
 						succ.receive(ackPacket);
@@ -122,7 +122,7 @@ public class UDPFileSender implements Runnable {
 						writer.flush();
 						System.out.println("received ackNumber: " + ackNumber + " === expected: " + expectedACK);
 						if (ackNumber.equals(expectedACK)) {
-							System.out.println("Received expected ACK, updating seqNum = " + ackNumber + "\n");
+							System.out.println("Received expected ACK, updating seqNum = " + ackNumber);
 							response = true;
 							sequenceNum = ackNumber;
 						}
