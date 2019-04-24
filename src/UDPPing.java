@@ -58,6 +58,7 @@ public class UDPPing implements Runnable {
 				//get the port number of the other peer, alternating between successors
 				if (alternate == 0) {
 					if (peer.getSequenceNum2() - peer.getTscSuc2() > 3) { //successor 2 has timed out. send alternate request
+						System.out.println("Peer " + peer.getSuccessor2() + " is no longer alive");
 						peerTimeout(destPort, peer.getSequenceNum2());
 						peer.setSequenceNum2(0);
 					}
@@ -68,7 +69,7 @@ public class UDPPing implements Runnable {
 					//System.out.println("current seq: " + seq + " - tscSuc2: " + peer.getTscSuc2() + " = " + (seq - peer.getTscSuc2()));
 				} else if (alternate == 1){
 					if (peer.getSequenceNum1() - peer.getTscSuc1() > 3) { //successor 1 has timed out. send alternate request
-						peerTimeout(destPort,peer.getSequenceNum1());
+						System.out.println("Peer " + peer.getSuccessor1() + " is no longer alive");
 						peer.setSequenceNum1(0);
 						peer.setSequenceNum2(0);
 					}
@@ -109,7 +110,8 @@ public class UDPPing implements Runnable {
 				peer.setSuccessor2(Integer.parseInt(message[2]));
 				peer.setTscSuc1(0);
 				peer.setTscSuc2(0);
-				//System.out.println("Peer is successor 1. It has timed out. New succ1 = " + peer.getSuccessor1() + ". New succ2 = " + peer.getSuccessor2());
+				System.out.println("My first successor is now peer " + peer.getSuccessor1());
+				System.out.println("My second successor is now peer " + peer.getSuccessor2());
 			} else if (destPort == peer.getSuccessor1()) {
 				if (Integer.parseInt(message[2]) != peer.getSuccessor2()) { 
 					peer.setSuccessor2(Integer.parseInt(message[2])); //successor has already updated its neighbour list, take its 1st successor
@@ -117,7 +119,9 @@ public class UDPPing implements Runnable {
 					peer.setSuccessor2(Integer.parseInt(message[3])); //successor has not updated its neighbour yet, take its 2nd successor
 				}
 				peer.setTscSuc2(0);
-				//System.out.println("Peer is successor 2. It has timed out. New succ2 = " + peer.getSuccessor2());
+
+				System.out.println("My first successor is now peer " + peer.getSuccessor1());
+				System.out.println("My second successor is now peer " + peer.getSuccessor2());
 			}
 			
 		} catch (IOException e) {
