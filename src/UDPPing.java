@@ -96,6 +96,8 @@ public class UDPPing implements Runnable {
 			String received = receiveRead.readLine();
 			nextPeer.close();
 			String[] message = received.split("\\s+");
+			System.out.println(request);
+			System.out.println(received);
 			if (destPort == peer.getSuccessor2()) {
 				peer.setSuccessor1(peer.getSuccessor2());
 				peer.setSuccessor2(Integer.parseInt(message[2]));
