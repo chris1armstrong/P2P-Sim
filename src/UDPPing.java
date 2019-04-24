@@ -36,6 +36,9 @@ public class UDPPing implements Runnable {
 		//Pinging loop
 		try {
 			while (true) {
+				if (peer.getRunning() == false) {
+					break;
+				}
 				System.out.println("Ping " + (50000 + destPort));
 				//Get an unused socket and build the ping packet
 				succ = new DatagramSocket();

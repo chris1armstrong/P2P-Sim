@@ -15,6 +15,7 @@ public class Peer {
 	private Integer tscSuc2; //Time Since Contact
 	private Integer sequenceNum1;
 	private Integer sequenceNum2;
+	private Boolean running;
 	
 	public Peer(String[] args) {
 		this.id = Integer.parseInt(args[0]);
@@ -35,6 +36,7 @@ public class Peer {
 		this.sequenceNum1 = 0;
 		this.sequenceNum2 = 0;
 		this.setUdpFileRecSocket(null);
+		this.setRunning(true);
 	}
 	
 
@@ -148,6 +150,16 @@ public class Peer {
 
 	public void setUdpFileRecSocket(DatagramSocket udpFileRecSocket) {
 		this.udpFileRecSocket = udpFileRecSocket;
+	}
+
+
+	public synchronized Boolean getRunning() {
+		return running;
+	}
+
+
+	public synchronized void setRunning(Boolean running) {
+		this.running = running;
 	}
 
 }

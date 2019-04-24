@@ -19,6 +19,9 @@ public class TCPReceiver implements Runnable {
 		try {
 			tcpReceiver = new ServerSocket(50000 + peer.getId());
 			while(true) {
+				if (peer.getRunning() == false) {
+					break;
+				}
 				System.out.println("TCPSocket bound, waiting for connection");
 				Socket peerConnection = tcpReceiver.accept();
 				DataInputStream inStream = new DataInputStream(peerConnection.getInputStream());

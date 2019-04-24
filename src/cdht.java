@@ -54,7 +54,6 @@ public class cdht {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-				
 				breaker = false;
 				
 			} else if (command[0].equals("request")) {
