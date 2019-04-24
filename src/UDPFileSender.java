@@ -102,9 +102,10 @@ public class UDPFileSender implements Runnable {
 							retrans = 1;
 						}
 						Long eventTime = System.currentTimeMillis() - peer.getStartTime();
-						writer.write(event + " " + eventTime + " " + sequenceNum + " " + dataLength + " 0\n");
-						writer.flush();
-
+						if (!done) {
+							writer.write(event + " " + eventTime + " " + sequenceNum + " " + dataLength + " 0\n");
+							writer.flush();
+						}
 						succ.receive(ackPacket);
 						eventTime = System.currentTimeMillis() - peer.getStartTime();
 						event = "rcv";
@@ -113,9 +114,10 @@ public class UDPFileSender implements Runnable {
 						Integer tempSeqNum = wrappedAckBuf.getInt();
 						Integer tempLength = wrappedAckBuf.getInt();
 						ackNumber = wrappedAckBuf.getInt();
-						
-						writer.write(event + " " + eventTime + " " + tempSeqNum + " " + tempLength + " " + ackNumber + "\n");
-						writer.flush();
+						if (!done) {
+							writer.write(event + " " + eventTime + " " + tempSeqNum + " " + tempLength + " " + ackNumber + "\n");
+							writer.flush();
+						}
 						if (ackNumber.equals(expectedACK)) {
 							response = true;
 							sequenceNum = ackNumber;
