@@ -16,6 +16,7 @@ public class Peer {
 	private Integer sequenceNum1;
 	private Integer sequenceNum2;
 	private Boolean running;
+	private Long startTime;
 	
 	public Peer(String[] args) {
 		this.id = Integer.parseInt(args[0]);
@@ -37,6 +38,7 @@ public class Peer {
 		this.sequenceNum2 = 0;
 		this.setUdpFileRecSocket(null);
 		this.setRunning(true);
+		this.startTime = System.currentTimeMillis();
 	}
 	
 
@@ -160,6 +162,11 @@ public class Peer {
 
 	public synchronized void setRunning(Boolean running) {
 		this.running = running;
+	}
+
+
+	public Long getStartTime() {
+		return startTime;
 	}
 
 }

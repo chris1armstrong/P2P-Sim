@@ -1,5 +1,7 @@
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.DatagramPacket;
@@ -24,8 +26,16 @@ public class UDPFileSender implements Runnable {
 	@Override
 	public void run() {
 		String filename = fileNum + ".pdf";
+		String logname = "responding_log.txt";
 		File input = new File(filename);
 		RandomAccessFile inputFile = null;
+		BufferedWriter writer = null;
+		String event = null;
+		try {
+			writer = new BufferedWriter(new FileWriter(logname));
+		} catch (IOException e2) {
+			e2.printStackTrace();
+		}
 		Random random = new Random();
 		try {
 			inputFile = new RandomAccessFile(input,"r");
@@ -61,8 +71,12 @@ public class UDPFileSender implements Runnable {
 			    	dataLength = 0;
 			    	done = true;
 			    } 
-			    
-			    ByteBuffer bufferino = ByteBuffer.allocate(4).putInt(sequenceNum);
+
+				Integer ackNumber = 0;
+			    ByteBuffer bufferino = ByteBuffer.allocate(4);
+			    bufferino.putInt(sequenceNum);
+			    bufferino.putInt(ackNumber);
+			    bufferino.putInt(peer.getMSS());
 				byte[] seqBytes = bufferino.array();
 				//System.out.println("buf length = " + (dataLength + seqBytes.length));
 				byte[] buf = new byte[dataLength + seqBytes.length];
@@ -70,11 +84,12 @@ public class UDPFileSender implements Runnable {
 				System.arraycopy(filebytes, 0, buf, seqBytes.length, dataLength);
 				DatagramPacket filePacket = new DatagramPacket(buf, buf.length, addr, receiverPort);
 				
-				byte[] ackBuf = new byte[4];
+				byte[] ackBuf = new byte[12];
 				DatagramPacket ackPacket = new DatagramPacket(buf, ackBuf.length);
 				
 				Boolean response = false;
 				Integer expectedACK = sequenceNum + dataLength;
+				Integer retrans = 0;
 				while(!response) {
 					try {
 
@@ -82,10 +97,27 @@ public class UDPFileSender implements Runnable {
 						//calculate drop rate here
 						if (random.nextDouble() >= peer.getDropRate()) {
 							succ.send(filePacket);
+							if (retrans > 0) {
+								event = "RTX";
+							} else {
+								event = "snd";
+								retrans = 1;
+							}
+						} else {
+							event = "drop";
 						}
+						Long eventTime = System.currentTimeMillis() - peer.getStartTime();
+						writer.write(event + " " + eventTime + " " + sequenceNum + " " + dataLength + " 0");
+						//Log sent/dropped/RTXed packet here
 						succ.receive(ackPacket);
+						eventTime = System.currentTimeMillis() - peer.getStartTime();
+						event = "rcv";
 						ackBuf = ackPacket.getData();
-						Integer ackNumber = ByteBuffer.wrap(ackBuf).getInt();
+						ByteBuffer wrappedAckBuf = ByteBuffer.wrap(ackBuf);
+						Integer tempSeqNum = wrappedAckBuf.getInt();
+						ackNumber = wrappedAckBuf.getInt();
+						
+						writer.write(event + " " + eventTime + " " + tempSeqNum + " 0 " + ackNumber);
 						//System.out.println("received ackNumber: " + ackNumber + " === expected: " + expectedACK);
 						if (ackNumber.equals(expectedACK)) {
 							//System.out.println("Received expected ACK, updating seqNum = " + ackNumber);
