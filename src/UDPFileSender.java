@@ -49,7 +49,7 @@ public class UDPFileSender implements Runnable {
 		Integer dataLength = 0;
 		try {
 			Boolean done = false;
-			Integer sequenceNum = 0;
+			Integer sequenceNum = 1;
 
 			succ = new DatagramSocket();
 			succ.setSoTimeout(1000);
@@ -96,6 +96,9 @@ public class UDPFileSender implements Runnable {
 							}
 						} else {
 							event = "drop";
+							if (retrans > 0) {
+								event = "RTX/drop";
+							}
 							retrans = 1;
 						}
 						Long eventTime = System.currentTimeMillis() - peer.getStartTime();
