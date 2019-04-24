@@ -52,7 +52,7 @@ public class UDPFileReceiver implements Runnable {
 				Integer ackNum = seqNum + length;
 				
 				if (length > 0) {
-					writer.write(event + "\t\t" + eventTime + "\t\t" + seqNum + "\t\t" + length + "\t\t0\n");
+					writer.write(event + " " + eventTime + " " + seqNum + " " + length + " 0\n");
 					writer.flush();
 				}
 				ByteBuffer respMessage = ByteBuffer.wrap(new byte[12]);
@@ -65,14 +65,14 @@ public class UDPFileReceiver implements Runnable {
 					System.out.println("The file is received");
 					transferComplete = true;
 				} else {
-					fileOut.write(Arrays.copyOfRange(input, 12, packet.getLength()));;
+					fileOut.write(Arrays.copyOfRange(input, 12, packet.getLength()));
 				}
 				receiver.send(response);
 				eventTime = System.currentTimeMillis() - peer.getStartTime();
 				event = "snd";
 				
 				if (length > 0) {
-					writer.write(event + "\t\t" + eventTime + "\t\t0\t\t" + length + "\t\t" + ackNum + "\n");
+					writer.write(event + " " + eventTime + " 0 " + length + " " + ackNum + "\n");
 					writer.flush();
 				}
 			} catch (IOException e) {

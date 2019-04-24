@@ -103,7 +103,7 @@ public class UDPFileSender implements Runnable {
 						}
 						Long eventTime = System.currentTimeMillis() - peer.getStartTime();
 						if (!done) {
-							writer.write(event + "\t\t" + eventTime + "\t\t" + sequenceNum + "\t\t" + dataLength + "\t\t0\n");
+							writer.write(event + " " + eventTime + " " + sequenceNum + " " + dataLength + " 0\n");
 							writer.flush();
 						}
 						succ.receive(ackPacket);
@@ -115,7 +115,7 @@ public class UDPFileSender implements Runnable {
 						ackNumber = wrappedAckBuf.getInt();
 						Integer tempLength = wrappedAckBuf.getInt();
 						if (!done) {
-							writer.write(event + "\t\t" + eventTime + "\t\t" + tempSeqNum + "\t\t" + tempLength + "\t\t" + ackNumber + "\n");
+							writer.write(event + " " + eventTime + " " + tempSeqNum + " " + tempLength + " " + ackNumber + "\n");
 							writer.flush();
 						}
 						if (ackNumber.equals(expectedACK)) {
