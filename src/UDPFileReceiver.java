@@ -26,21 +26,21 @@ public class UDPFileReceiver implements Runnable {
 			e1.printStackTrace();
 		}
 		while (!transferComplete) {
-			System.out.println("waiting for file packet");
+			//System.out.println("waiting for file packet");
 			try {
 				receiver.receive(packet);
 				byte[] input = new byte[packet.getLength()];
 				input = packet.getData();
 				ByteBuffer data = ByteBuffer.wrap(input);
 				Integer seqNum = data.getInt();
-				System.out.println("Received packet seq= " + seqNum + " === received packet length = " + packet.getLength());
+				//System.out.println("Received packet seq= " + seqNum + " === received packet length = " + packet.getLength());
 				Integer ackNum = seqNum + packet.getLength() - 4;
-				System.out.println("ackNum= " + ackNum);
+				//System.out.println("ackNum= " + ackNum);
 				ByteBuffer respMessage = ByteBuffer.wrap(new byte[4]).putInt(ackNum);
 				byte[] outBuf = respMessage.array();
 				DatagramPacket response = new DatagramPacket(outBuf, outBuf.length, packet.getSocketAddress());
 				if (packet.getLength() == 4) { //length of lone sequence Num
-					System.out.println("END packet received");
+					System.out.println("The file is received");
 					transferComplete = true;
 				} else {
 					fileOut.write(Arrays.copyOfRange(input, 4, packet.getLength()));;

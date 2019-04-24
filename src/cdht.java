@@ -27,7 +27,7 @@ public class cdht {
 			String input = scan.nextLine();
 			String[] command = input.split("\\s+");
 			if (command[0].equals("quit")) {
-				System.out.println("I'm ded");
+				//System.out.println("I'm ded");
 				// 2. "fromID departing succ1 succ2"
 				try {
 					if (peer.getPredecessor1() != -1) {
@@ -35,7 +35,7 @@ public class cdht {
 						request = new Socket("localhost", 50000 + peer.getPredecessor1());
 						DataOutputStream requestOut = new DataOutputStream(request.getOutputStream());
 						String b = new String(peer.getId() + " departing " + peer.getSuccessor1() + " " + peer.getSuccessor2());
-						System.out.println("Sending message: " + b);
+						//System.out.println("Sending message: " + b);
 						requestOut.writeBytes(b + '\n');
 						request.close();
 						breaker = false;
@@ -45,7 +45,7 @@ public class cdht {
 						request = new Socket("localhost", 50000 + peer.getPredecessor2());
 						DataOutputStream requestOut = new DataOutputStream(request.getOutputStream());
 						String b = new String(peer.getId() + " departing " + peer.getSuccessor1() + " " + peer.getSuccessor2());
-						System.out.println("Sending message: " + b);
+						//System.out.println("Sending message: " + b);
 						requestOut.writeBytes(b + '\n');
 						request.close();
 						breaker = false;
@@ -59,8 +59,8 @@ public class cdht {
 				
 			} else if (command[0].equals("request")) {
 				String fileNo = command[1];
-				System.out.println("File num = " + fileNo);
-				System.out.println("File num as Integer = " + Integer.parseInt(fileNo));
+				//System.out.println("File num = " + fileNo);
+				//System.out.println("File num as Integer = " + Integer.parseInt(fileNo));
 				Socket request = null;
 				
 				try {
@@ -71,7 +71,7 @@ public class cdht {
 					request = new Socket("localhost", 50000 + peer.getSuccessor1());
 					DataOutputStream outToClient = new DataOutputStream(request.getOutputStream());
 					String b = new String(peer.getId() + " request " + peer.getId() + " " + fileNo + " " + peer.getUdpFileRecSocket().getLocalPort());
-					System.out.println("Sending message: " + b);
+					System.out.println("File request message for " + fileNo + " has been sent to my successor");
 					//message style: "fromID request origin fileNo UDPFileReceiverPort"
 					outToClient.writeBytes(b + '\n');
 					request.close();

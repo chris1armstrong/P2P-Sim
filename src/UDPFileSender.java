@@ -30,13 +30,13 @@ public class UDPFileSender implements Runnable {
 		try {
 			inputFile = new RandomAccessFile(input,"r");
 		} catch (FileNotFoundException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		
-		System.out.println("Peer: " + peer.getId() + " file sender thread started");
-		System.out.println("SLURPING UP the file: " + filename + " === opened file: " + input);
-		System.out.println("Chunking and sending to: " + receiverPort);
+		//System.out.println("Peer: " + peer.getId() + " file sender thread started");
+		//System.out.println("SLURPING UP the file: " + filename + " === opened file: " + input);
+		//System.out.println("Chunking and sending to: " + receiverPort);
+		System.out.println("We now start sending the file .........");
 		
 		DatagramSocket succ = null;
 		byte[] filebytes = new byte[peer.getMSS()];
@@ -55,16 +55,16 @@ public class UDPFileSender implements Runnable {
 			}
 			while (!done) {
 				dataLength = inputFile.read(filebytes);
-				System.out.println("I read in " + dataLength + " bytes");
+				//System.out.println("I read in " + dataLength + " bytes");
 			    if (dataLength == -1) { //catch the end of file, modify to keep sequence numbers consistent
-					System.out.println("I read nothing, file end");
+					//System.out.println("I read nothing, file end");
 			    	dataLength = 0;
 			    	done = true;
 			    } 
 			    
 			    ByteBuffer bufferino = ByteBuffer.allocate(4).putInt(sequenceNum);
 				byte[] seqBytes = bufferino.array();
-				System.out.println("buf length = " + (dataLength + seqBytes.length));
+				//System.out.println("buf length = " + (dataLength + seqBytes.length));
 				byte[] buf = new byte[dataLength + seqBytes.length];
 				System.arraycopy(seqBytes, 0, buf, 0, seqBytes.length);
 				System.arraycopy(filebytes, 0, buf, seqBytes.length, dataLength);
@@ -78,7 +78,7 @@ public class UDPFileSender implements Runnable {
 				while(!response) {
 					try {
 
-						System.out.println("sending file packet " + sequenceNum);
+						//System.out.println("sending file packet " + sequenceNum);
 						//calculate drop rate here
 						if (random.nextDouble() >= peer.getDropRate()) {
 							succ.send(filePacket);
@@ -86,22 +86,21 @@ public class UDPFileSender implements Runnable {
 						succ.receive(ackPacket);
 						ackBuf = ackPacket.getData();
 						Integer ackNumber = ByteBuffer.wrap(ackBuf).getInt();
-						System.out.println("received ackNumber: " + ackNumber + " === expected: " + expectedACK);
-						if (!ackNumber.equals(expectedACK)) {
-							System.out.println("These are not equal :: received ackNumber: " + ackNumber + " === expected: " + expectedACK);
-						}
+						//System.out.println("received ackNumber: " + ackNumber + " === expected: " + expectedACK);
 						if (ackNumber.equals(expectedACK)) {
-							System.out.println("Received expected ACK, updating seqNum = " + ackNumber);
+							//System.out.println("Received expected ACK, updating seqNum = " + ackNumber);
 							response = true;
 							sequenceNum = ackNumber;
 						}
 					} catch (SocketTimeoutException e) {
-						System.out.println("response timeout for packet with seq num: " + sequenceNum + " === resending");
+						//System.out.println("response timeout for packet with seq num: " + sequenceNum + " === resending");
 					}
+				}
+				if (done) {
+					System.out.println("The file is sent");
 				}
 			}
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		} finally {
 			succ.close();

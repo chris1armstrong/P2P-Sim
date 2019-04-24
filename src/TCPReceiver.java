@@ -83,26 +83,30 @@ public class TCPReceiver implements Runnable {
 						forwardOut.writeBytes(forwardMessage + '\n');
 						forward.close();
 						//Close TCP connection
-						System.out.println("Forwarding to successor, peer " + peer.getSuccessor1());
+						System.out.println("File " + message[3] + " is not stored here");
+						System.out.println("File request message has been forwarded to my successor");
 					}
 					if (mine) {
 						//Establish connection to origin TCP port, send confirmation
+						System.out.println("File " + message[3] + " is here");
 						InetAddress confirmAddr = InetAddress.getByName("localhost");
 						Socket confirm = new Socket(confirmAddr, 50000 + origin);
 						DataOutputStream forwardOut = new DataOutputStream(confirm.getOutputStream());
 						String forwardMessage = new String(peer.getId() + " confirm " + message[3]);
+						System.out.println("A response message, destinged for peer " + origin + ", has been sent");
 						forwardOut.writeBytes(forwardMessage + '\n');
 						confirm.close();
 						//Start UDPFileSender Thread, give it fileNo & UDPFileReceiverPort
 						Integer receiverPort = Integer.parseInt(message[4]);
 						Thread sender = new Thread(new UDPFileSender(peer, message[3], receiverPort));
 						sender.start();
-						System.out.println("I have the file " + fileNum);
+						//System.out.println("I have the file " + fileNum);
 					}
 					break;
 				case "confirm":
 					//received confirmation message from peer holding requested fileNo
-					System.out.println("File " + Integer.parseInt(message[2]) + " found in peer " + Integer.parseInt(message[0]));
+					System.out.println("Received a response message from peer " + Integer.parseInt(message[0]) + 
+								", which has the file "+ Integer.parseInt(message[2]));
 					break;
 				}
 
