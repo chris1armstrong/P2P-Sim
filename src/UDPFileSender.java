@@ -118,11 +118,11 @@ public class UDPFileSender implements Runnable {
 						Integer tempSeqNum = wrappedAckBuf.getInt();
 						ackNumber = wrappedAckBuf.getInt();
 						
-						writer.write(event + " " + eventTime + " " + tempSeqNum + " 0 " + ackNumber);
+						writer.write(event + " " + eventTime + " " + tempSeqNum + " 0 " + ackNumber + "\n");
 						writer.flush();
 						System.out.println("received ackNumber: " + ackNumber + " === expected: " + expectedACK);
 						if (ackNumber.equals(expectedACK)) {
-							System.out.println("Received expected ACK, updating seqNum = " + ackNumber);
+							System.out.println("Received expected ACK, updating seqNum = " + ackNumber + "\n");
 							response = true;
 							sequenceNum = ackNumber;
 						}
