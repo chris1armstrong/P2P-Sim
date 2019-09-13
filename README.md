@@ -6,6 +6,14 @@ Cyclic P2P network simulator
   compile with "javac *.java"\
   execute a setup script in the format of setup.sh and setup2.sh with "./setup.sh"\
   These scripts will open each peer in a new xterm window, where they can be controlled individually
+  
+### Script arguments
+  The executable part of this line is “java cdht 1 3 4 400 0.1”.\
+  The first input argument, i.e., 1” is the identity of the peer to be initialised.\
+  The second and third arguments, i.e., 3 and 4, are the identities of the two successive peers.\
+  The forth argument is Maximum Segment Size (MSS) used to determine the size of the data that must be transferred in each segment, MSS in
+  this example is set to 400. The chunk size when dividing up a file for transfer to the requester.\
+  The last argument is the drop probability which must be between 0-1. This is the simulated chance of packets being lost in file transfer.
 
 ## Available commands
   quit - this will soft kill the peer, informing its neighbours and updating quickly\
