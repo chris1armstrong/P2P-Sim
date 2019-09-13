@@ -1,3 +1,5 @@
+//Written by Chris Armstrong, April 2019
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
